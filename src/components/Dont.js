@@ -1,4 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer,Label } from 'recharts';
+import { DataContext } from '../context/DataContext';
+import { useContext } from 'react';
 
 const data = [
   { name: 'Expiring <1 Yr', value: 400, color: '#FF5C5C' },
@@ -7,6 +9,7 @@ const data = [
 ];
 
 export default function LeaseDonut() {
+  const {forecastData,curIndex}=useContext(DataContext)
   return (
     <ResponsiveContainer width="100%" height={250}>
       <PieChart>
@@ -23,7 +26,7 @@ export default function LeaseDonut() {
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
           <Label
-            value={` Q3 25\t Total\n${20}`}
+            value={` ${forecastData[curIndex].quarter} ${"\n"} ${forecastData[curIndex].layer1}`}
             position="center"
             style={{
               textAlign: "center",
