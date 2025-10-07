@@ -1,5 +1,6 @@
 import './App.css';
 import NationalStats from './components/NationalCard';
+import Seattle from './components/Seattle';
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       }}
     >
       <NationalStats/>
+      <Seattle/>
     </div>
   );
 }

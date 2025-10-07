@@ -2,10 +2,10 @@ import LeaseDonut from "./Donut";
 import LeaseForecast from "./ForcastBar";
 import '../styles/nationalCard.css'
 
-export default function NationalStats() {
+export default function Seattle() {
   return (
     <div className="analysis-container">
-      <h2 className="analysis-title">National</h2>
+      <h2 className="analysis-title">Seattle</h2>
 
       <LeaseDonut />
 

@@ -1,0 +1,37 @@
+/* Outer container for the chart */
+.lease-donut-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  max-width: 400px;
+  margin: auto;
+}
+
+/* Pie chart wrapper */
+.lease-donut-chart {
+  overflow: visible;
+}
+
+/* Pie chart elements (individual slices) */
+.lease-donut-cell {
+  cursor: pointer;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.lease-donut-cell:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Label text inside donut */
+.lease-donut-label {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  white-space: pre-line;
+  fill: #333;
+}

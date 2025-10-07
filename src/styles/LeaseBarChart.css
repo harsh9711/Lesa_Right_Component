@@ -1,0 +1,24 @@
+.lease-bar-container {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Default bar appearance */
+.lease-bar-cell {
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+/* Hover effect */
+.lease-bar-cell:hover {
+  opacity: 0.9;
+}
+
+/* Highlight the active bar */
+.active-bar {
+  stroke: #000;
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+}
