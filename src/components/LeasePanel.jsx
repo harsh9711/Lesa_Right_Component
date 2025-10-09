@@ -27,7 +27,11 @@ const PanelWrap = styled.div`
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
-  transition: width 220ms ease;
+  /* Enhanced transition for stretch effect */
+  transition:
+    width 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
 `;
 
 const Header = styled.div`
@@ -197,7 +201,7 @@ const CanvasWrap = styled.div`
   width: 100%;
   height: 450px;
   border-radius: 8px;
-  background: linear-gradient(180deg, #fafafa 0%, #f3f3f8 100%);
+  // background: linear-gradient(180deg, #fafafa 0%, #f3f3f8 100%);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -205,7 +209,7 @@ const CanvasWrap = styled.div`
 `;
 const PageCanvas = styled.canvas`
   width: 100%;
-  height: 100%;
+  height:auto;
   transition: opacity 220ms ease, transform 220ms ease;
   will-change: opacity, transform;
 `;
@@ -217,10 +221,10 @@ const shimmer = keyframes`
 
 const SkeletonBox = styled.div`
   width: 100%;
-  height: 100%;
+  height: 50%;
   border-radius: 8px;
   background: linear-gradient(90deg, #f0f0f3 0%, #e6e6ee 50%, #f0f0f3 100%);
-  background-size: 200% 100%;
+  background-size: 100% 100%;
   animation: ${shimmer} 1.2s ease-in-out infinite;
 `;
 
@@ -303,12 +307,14 @@ const SectionCard = styled.button`
     opacity: 0.9;
   }
 `;
-
 const AccordionContent = styled.div`
   max-height: ${(p) => (p.$open ? "500px" : "0")};
   opacity: ${(p) => (p.$open ? "1" : "0")};
   overflow: hidden;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    max-height 8s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s,
+    transform 8s cubic-bezier(0.22, 1, 0.36, 1);
   margin-top: ${(p) => (p.$open ? "0px" : "0")};
   position: ${(p) => (p.$wide ? "relative" : "static")};
   transform: ${(p) => (p.$open ? "translateY(0)" : "translateY(-5px)")};
@@ -872,7 +878,16 @@ export default function App({ onClose = () => {} }) {
                 onToggle={toggle}
               />
             ))}
-
+  {/* {sortedSections.map((section) => (
+            <SectionCardComponent
+              key={section.k}
+              section={section}
+              isActive={activeKey === section.k}
+              isOpen={openKeys[section.k]}
+              isWide={wide}
+              onToggle={toggle}
+            />
+          ))} */}
             <RestSectionsWrap>
               {sortedSections.slice(1).map((section) => (
                 <SectionCardComponent
