@@ -16,7 +16,7 @@ const PanelWrap = styled.div`
   position: absolute;
   top: 24px;
   right: 24px;
-  width: ${(p) => (p.$wide ? "720px" : "420px")};
+  width: ${(p) => (p.$wide ? "900px" : "420px")};
   max-height: calc(100vh - 48px);
   overflow: auto;
   background:
@@ -32,7 +32,6 @@ const PanelWrap = styled.div`
 
 const Header = styled.div`
   padding: 18px 20px 10px 20px;
-  border-bottom: 2px solid #f1d0e3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,11 +172,11 @@ const PreviewShell = styled.div`
   padding: 14px;
   border: 2px solid #f1d0e3;
   border-top: none;
-  border-radius: 0px 20px 20px 0px;
+  border-radius: 0px 20px 20px 20px;
   border-top-right-radius: ${(p) => (p.$noTopRight ? '0px' : '20px')};
   background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
   display: grid;
-  grid-template-columns: 2fr 104px; 
+  grid-template-columns: 3fr 104px; 
   gap: 12px;
   position: relative;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -282,11 +281,11 @@ const SectionCard = styled.button`
   padding: 16px;
   border-radius: 12px;
   background: #fff;
-  border: ${(p) =>  (p.$wide ? "none" : "2px solid #ececf2")};
+  border: ${(p) => (p.$active && !p.$wide ? "2px solid #ff4da6" : (p.$wide ? "none" : "2px solid #ececf2"))};
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  width: calc(100% - 32px);
+  width: calc(100% - 24px);
   cursor: pointer;
   box-shadow: ${(p) => (p.$wide ? "none" : "0 2px 6px rgba(0,0,0,0.04)")};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -316,7 +315,7 @@ const AccordionContent = styled.div`
 
 const AccordionInner = styled.div`
   display: grid;
-  grid-template-columns: ${(p) => (p.$wide ? "1.2fr 1.6fr" : "1fr")};
+  grid-template-columns: ${(p) => (p.$wide ? "1fr 2fr" : "1fr")};
   gap: 0px;
   align-items: start;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -350,14 +349,14 @@ const RestSectionsWrap = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0px;
-  width: calc(40% - 16px);
+  width: calc(30% - 4px);
 `;
 
-const CompactSectionCard = styled(SectionCard)`
-  display: flex;
-  margin: 0;
-  padding: 12px 16px;
-`;
+// const CompactSectionCard = styled(SectionCard)`
+//   display: flex;
+//   margin: 0;
+//   padding: 12px 16px;
+// `;
 
 const SectionHeaderBar = styled.div`
   margin: 14px 16px 0 16px;
