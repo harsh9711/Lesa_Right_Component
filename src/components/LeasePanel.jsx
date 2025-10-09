@@ -287,8 +287,9 @@ const SectionCard = styled.button`
   justify-content: space-between;
   width: calc(100% - 24px);
   cursor: pointer;
-  box-shadow: ${(p) => (p.$wide ? "none" : "0 2px 6px rgba(0,0,0,0.04)")};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: ${p => (p.$active ? '0 6px 14px rgba(255,77,166,0.12)' : '0 2px 6px rgba(0,0,0,0.04)')};
+
+  transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
 
   &:hover {
