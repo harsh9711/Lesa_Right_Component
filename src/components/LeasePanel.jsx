@@ -27,7 +27,6 @@ const PanelWrap = styled.div`
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
-  /* Enhanced transition for stretch effect */
   transition:
     width 0.8s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
@@ -128,7 +127,29 @@ const SectionTitle = styled.div`
   font-size: ${(p) => (p.$small ? '14px' : '16px')};
   flex: 1;
 `;
+const PreviewShell = styled.div`
+  margin: 0 16px 16px 0;
+  padding: 14px;
+  border: 2px solid #f1d0e3;
+  border-radius: 0px 20px 20px 20px;
+  border-top-right-radius: ${(p) => (p.$noTopRight ? '0px' : '20px')};
+  background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
+  display: grid;
+  grid-template-columns: 3fr 104px; 
+  gap: 12px;
+  position: relative;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 
+  // &::before {
+  //   content: "";
+  //   position: absolute;
+  //   top: 0;
+  //   left: -2px;
+  //   width: 2px;
+  //   height: 128px;
+  //   background: #ffffff; 
+  // }
+`;
 const BadgeRow = styled.div`
   display: flex;
   align-items: center;
@@ -170,32 +191,6 @@ const Hint = styled.div`
   color: #6a6a6a;
   font-size: 12px;
 `;
-
-const PreviewShell = styled.div`
-  margin: 0 16px 16px 0;
-  padding: 14px;
-  border: 2px solid #f1d0e3;
-  border-top: none;
-  border-radius: 0px 20px 20px 20px;
-  border-top-right-radius: ${(p) => (p.$noTopRight ? '0px' : '20px')};
-  background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
-  display: grid;
-  grid-template-columns: 3fr 104px; 
-  gap: 12px;
-  position: relative;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -2px;
-    width: 2px;
-    height: 128px;
-    background: #ffffff; 
-  }
-`;
-
 
 const CanvasWrap = styled.div`
   width: 100%;
@@ -281,15 +276,22 @@ const Thumb = styled.div`
 `;
 
 const SectionCard = styled.button`
-  margin: 8px 16px;
-  padding: 16px;
+      padding: ${p => (p.$wide ? '0px' : '16px')};
+ margin: ${p => (p.$wide ? '8px 16px' : '8px 8px')};
   border-radius: 12px;
   background: #fff;
-  border: ${(p) => (p.$active && !p.$wide ? "2px solid #ff4da6" : (p.$wide ? "none" : "2px solid #ececf2"))};
-  display: flex;
+ border: ${(p) =>
+    p.$active && p.$wide
+    ? "2px solid #ffd1e8"
+      : p.$wide
+      ? "2px solid #f1d0e3"
+        : p.$active
+          ? "2px solid #ff4da6"
+          : "2px solid #f1d0e3"};  
+          display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  width: calc(100% - 24px);
+  width: calc(100% - 20px);
   cursor: pointer;
     box-shadow: ${p => (p.$active ? '0 6px 14px rgba(255,77,166,0.12)' : '0 2px 6px rgba(0,0,0,0.04)')};
 
@@ -307,36 +309,33 @@ const SectionCard = styled.button`
     opacity: 0.9;
   }
 `;
+
 const AccordionContent = styled.div`
   max-height: ${(p) => (p.$open ? "500px" : "0")};
   opacity: ${(p) => (p.$open ? "1" : "0")};
   overflow: hidden;
   transition:
-    max-height 8s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 2s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s,
-    transform 8s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
   margin-top: ${(p) => (p.$open ? "0px" : "0")};
   position: ${(p) => (p.$wide ? "relative" : "static")};
   transform: ${(p) => (p.$open ? "translateY(0)" : "translateY(-5px)")};
 `;
-
 const AccordionInner = styled.div`
   display: grid;
-  grid-template-columns: ${(p) => (p.$wide ? "1fr 2fr" : "1fr")};
-  gap: 0px;
-  align-items: start;
+  grid-template-columns: ${(p) => (p.$wide ? "1.5fr 1fr" : "1fr")};
+  gap: 0;
+  align-items: stretch;
+  width: 100%;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
+
 const DetailsShell = styled.div`
   margin: 0 0 16px 16px;
-  padding: 14px;
-  
- border: 2px solid #f1d0e3;
-  border-right: none;
-  border-top: none;
-  border-bottom: ${(p) => (p.$wide ? "2px solid #f1d0e3" : "none")};
-    border-left: ${(p) => (p.$wide ? "2px solid #f1d0e3" : "none")};
+  padding: 0px;
+
   border-radius: 20px 0px 0px 20px;
   border-top-left-radius: ${(p) => (p.$noTopLeft ? '0px' : '20px')};
   background: #ffffff;
@@ -349,15 +348,7 @@ const DetailsShell = styled.div`
   opacity: ${(p) => (p.$wide ? "1" : "1")};
 `;
 
-const RestSectionsWrap = styled.div`
-  position: absolute;
-  left: 36px;
-  top: 340px;
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
-  width: calc(30% - 4px);
-`;
+ 
 
 // const CompactSectionCard = styled(SectionCard)`
 //   display: flex;
@@ -366,14 +357,11 @@ const RestSectionsWrap = styled.div`
 // `;
 
 const SectionHeaderBar = styled.div`
-  margin: 14px 16px 0 16px;
-  padding: 12px 14px;
-  border-top: 2px solid #f1d0e3;
-  border-left: 2px solid #f1d0e3;
-  border-right: 2px solid #f1d0e3;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  border-bottom: none;
+
+  margin: ${(p) => (p.$wide ? "0px 0px 0 16px" : "14px 16px 0 16p")};
+    padding: ${(p) => (p.$wide ? "8px 0px" : "12px 14px")};
+
+
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 `;
@@ -534,16 +522,7 @@ const GroundContent = ({ isWide }) => {
           <span>Landowner signaled rent hike request (~15%)</span>
         </Hint>
       </DetailsShell>
-      {isWide && (
-        <PreviewShell $wide={isWide} $noTopRight>
-          <PDFPageCanvas pdfUrl={pdfUrl} pageNumber={currentPage} />
-          <PDFThumbnailViewer
-            pdfUrl={pdfUrl}
-            onPageClick={setCurrentPage}
-            currentPage={currentPage}
-          />
-        </PreviewShell>
-      )}
+
     </AccordionInner>
   );
 };
@@ -578,16 +557,7 @@ const TowerContent = ({ isWide }) => {
           </DetailItem>
         </DetailGrid>
       </DetailsShell>
-      {isWide && (
-        <PreviewShell $wide={isWide} $noTopRight>
-          <PDFPageCanvas pdfUrl={pdfUrl} pageNumber={currentPage} />
-          <PDFThumbnailViewer
-            pdfUrl={pdfUrl}
-            onPageClick={setCurrentPage}
-            currentPage={currentPage}
-          />
-        </PreviewShell>
-      )}
+
     </AccordionInner>
   );
 };
@@ -612,15 +582,7 @@ const UtilityContent = ({ isWide }) => {
           </DetailItem>
         </DetailGrid>
       </DetailsShell>
-      {isWide && (
-        <PreviewShell $wide={isWide} style={{ borderTopRightRadius: 0 }}>
-          <PDFPageCanvas pdfUrl={pdfUrl} pageNumber={currentPage} />
-          <PDFThumbnailViewer
-            pdfUrl={pdfUrl}
-            onPageClick={setCurrentPage}
-          />
-        </PreviewShell>
-      )}
+
     </AccordionInner>
   );
 };
@@ -645,15 +607,7 @@ const AccessContent = ({ isWide }) => {
           </DetailItem>
         </DetailGrid>
       </DetailsShell>
-      {isWide && (
-        <PreviewShell $wide={isWide} style={{ borderTopRightRadius: 0 }}>
-          <PDFPageCanvas pdfUrl={pdfUrl} pageNumber={currentPage} />
-          <PDFThumbnailViewer
-            pdfUrl={pdfUrl}
-            onPageClick={setCurrentPage}
-          />
-        </PreviewShell>
-      )}
+
     </AccordionInner>
   );
 };
@@ -790,7 +744,7 @@ const SectionCardComponent = ({
   );
 };
 
-export default function App({ onClose = () => {} }) {
+export default function App({ onClose = () => { } }) {
   const [wide, setWide] = React.useState(false);
   const [openKeys, setOpenKeys] = React.useState({
     ground: true,
@@ -813,11 +767,7 @@ export default function App({ onClose = () => {} }) {
     });
   };
 
-  const sortedSections = React.useMemo(() => {
-    const active = SECTIONS.find((s) => s.k === activeKey);
-    const rest = SECTIONS.filter((s) => s.k !== activeKey);
-    return active ? [active, ...rest] : SECTIONS;
-  }, [activeKey]);
+  const sortedSections = SECTIONS;
 
   return (
     <PanelWrap $wide={wide} onClick={(e) => e.stopPropagation()}>
@@ -852,7 +802,7 @@ export default function App({ onClose = () => {} }) {
             </IconBtn>
           ) : (
             <>
-          <IconBtn aria-label="favorite">☆</IconBtn>
+                <IconBtn aria-label="favorite">☆</IconBtn>
               <IconBtn
                 aria-label="expand"
                 onClick={() => setWide((w) => !w)}
@@ -864,43 +814,40 @@ export default function App({ onClose = () => {} }) {
           )}
         </HeaderRight>
       </Header>
-
-                        <div>
+      <div>
         {wide ? (
-          <>
-            {sortedSections.slice(0, 1).map((section) => (
-              <SectionCardComponent
-                key={section.k}
-                section={section}
-                isActive={activeKey === section.k}
-                isOpen={openKeys[section.k]}
-                isWide={wide}
-                onToggle={toggle}
-              />
-            ))}
-  {/* {sortedSections.map((section) => (
-            <SectionCardComponent
-              key={section.k}
-              section={section}
-              isActive={activeKey === section.k}
-              isOpen={openKeys[section.k]}
-              isWide={wide}
-              onToggle={toggle}
-            />
-          ))} */}
-            <RestSectionsWrap>
-              {sortedSections.slice(1).map((section) => (
+          <AccordionInner $wide>
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              {sortedSections.map((section) => (
                 <SectionCardComponent
                   key={section.k}
                   section={section}
                   isActive={activeKey === section.k}
                   isOpen={openKeys[section.k]}
-                  isWide={false}
-                  onToggle={toggle}
+                  isWide={wide}
+                  onToggle={toggle} style={{
+                    margin: "0px 4px", // Remove right margin
+                    borderRadius: "12px 0 0 12px", // Only left corners rounded
+                    borderRight: "none", // No right border
+                    width: "100%",
+                  }}
                 />
               ))}
-            </RestSectionsWrap>
-          </>
+            </div>
+            <PreviewShell
+              $wide
+              style={{
+                 borderRadius: "0px 20px 20px 20px", // Only right corners rounded
+               }}
+            >
+              <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={1} />
+              <PDFThumbnailViewer
+                pdfUrl="/dummy.pdf"
+                onPageClick={() => { }}
+                currentPage={1}
+              />
+            </PreviewShell>
+          </AccordionInner>
         ) : (
           sortedSections.map((section) => (
             <SectionCardComponent
