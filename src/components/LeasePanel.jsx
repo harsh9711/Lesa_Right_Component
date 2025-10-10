@@ -1,372 +1,13 @@
-"use client";
+import React, { useState, useRef, useEffect } from "react";
+import { PDFPageCanvas, PDFThumbnailViewer } from "./PDFViewer";
 
-import React, { useEffect } from "react";
-import styled, { keyframes } from "styled-components";
-import * as pdfjsLib from "pdfjs-dist";
-
-if (typeof window !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs";
+interface Section {
+  k: string;
+  label: string;
+  icon: string;
 }
 
-export { pdfjsLib };
-
-
-
-const PanelWrap = styled.div`
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  width: ${(p) => (p.$wide ? "900px" : "420px")};
-  max-height: calc(100vh - 48px);
-  overflow: auto;
-  background:
-    radial-gradient(1200px 400px at 100% -50%, rgba(255, 77, 166, 0.06), transparent 60%),
-    radial-gradient(1000px 600px at -10% 10%, rgba(255, 202, 236, 0.18), transparent 60%),
-    #ffffffee;
-  border: 2px solid #ff4da6;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(6px);
-  transition:
-    width 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
-    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
-`;
-
-const Header = styled.div`
-  padding: 18px 20px 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
-`;
-
-const Title = styled.div`
-  font-weight: 300;
-  font-size: 22px;
-  color: #2b2b2b;
-`;
-
-const TitleStrong = styled.span`
-  font-weight: 600;
-`;
-
-const SubTitle = styled.div`
-  margin-top: 4px;
-  font-size: 12px;
-  color: black;
-`;
-
-const SubTitleSecondary = styled(SubTitle)`
-  margin-top: 6px;
-`;
-
-const HeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: absolute;
-  top: 12px;
-  right: 20px;
-`;
-
-const HeaderRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-between;
-  gap: 10px;
-`;
-
-const IconBtn = styled.button`
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  border: 2px solid #ffd1e8;
-  background: #fff;
-  color: #ff4da6;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 1;
-  outline: none;
-
-  &:hover {
-    transform: scale(1.05);
-    opacity: 0.8;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  }
-
-  &:active {
-    transform: scale(0.95);
-    opacity: 0.9;
-  }
-
-  &:focus-visible {
-    box-shadow: 0 0 0 3px rgba(255, 77, 166, 0.25), 0 6px 15px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const SectionHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-`;
-
-const SectionTitle = styled.div`
-  font-weight: 700;
-  color: #2b2b2b;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: ${(p) => (p.$small ? '14px' : '16px')};
-  flex: 1;
-`;
-const PreviewShell = styled.div`
-  margin: 0 16px 16px 0;
-  padding: 14px;
-  border: 2px solid #f1d0e3;
-  border-radius: 0px 20px 20px 20px;
-  border-top-right-radius: ${(p) => (p.$noTopRight ? '0px' : '20px')};
-  background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
-  display: grid;
-  grid-template-columns: 3fr 104px; 
-  gap: 12px;
-  position: relative;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-
-  // &::before {
-  //   content: "";
-  //   position: absolute;
-  //   top: 0;
-  //   left: -2px;
-  //   width: 2px;
-  //   height: 128px;
-  //   background: #ffffff; 
-  // }
-`;
-const BadgeRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const Badge = styled.span`
-  width: ${(p) => (p.$size === 'sm' ? '20px' : '28px')};
-  height: ${(p) => (p.$size === 'sm' ? '20px' : '28px')};
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 2px solid ${(p) => p.color || "#ccc"};
-  color: ${(p) => p.color || "#555"};
-  background: #fff;
-  font-size: ${(p) => (p.$size === 'sm' ? '12px' : '14px')};
-`;
-
-const DetailGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 16px;
-  margin-top: 12px;
-`;
-
-const DetailItem = styled.div`
-  border-left: 3px solid #e9e9ef;
-  padding-left: 10px;
-  font-size: 13px;
-  color: #3b3b3b;
-`;
-
-const Hint = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  color: #6a6a6a;
-  font-size: 12px;
-`;
-
-const CanvasWrap = styled.div`
-  width: 100%;
-  height: 450px;
-  border-radius: 8px;
-  // background: linear-gradient(180deg, #fafafa 0%, #f3f3f8 100%);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-const PageCanvas = styled.canvas`
-  width: 100%;
-  height:auto;
-  transition: opacity 220ms ease, transform 220ms ease;
-  will-change: opacity, transform;
-`;
-
-const shimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`;
-
-const SkeletonBox = styled.div`
-  width: 100%;
-  height: 50%;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #f0f0f3 0%, #e6e6ee 50%, #f0f0f3 100%);
-  background-size: 100% 100%;
-  animation: ${shimmer} 1.2s ease-in-out infinite;
-`;
-
-const ThumbnailGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-  width: 104px;
-  align-items: center;
-  max-height: 300px;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-track {
-    background: #faf4f9;
-    border-radius: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #f1d0e3;
-    border-radius: 8px;
-    border: 2px solid #faf4f9;
-  }
-`;
-
-const Thumb = styled.div`
-  width: 96px;
-  height: 128px;
-  border-radius: 6px;
-  background: #ffffff;
-  border: 2px solid ${(p) => (p.$active ? '#ff4da6' : '#f1d0e3')};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-
-  &:hover {
-    transform: translateY(-1px) scale(1.03);
-    border-color: #ff4da6;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  }
-
-  &:active {
-    transform: translateY(0) scale(0.99);
-  }
-
-  canvas {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-`;
-
-const SectionCard = styled.button`
-      padding: ${p => (p.$wide ? '0px' : '16px')};
- margin: ${p => (p.$wide ? '8px 16px' : '8px 8px')};
-  border-radius: 12px;
-  background: #fff;
- border: ${(p) =>
-    p.$active && p.$wide
-    ? "2px solid #ffd1e8"
-      : p.$wide
-      ? "2px solid #f1d0e3"
-        : p.$active
-          ? "2px solid #ff4da6"
-          : "2px solid #f1d0e3"};  
-          display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  width: calc(100% - 20px);
-  cursor: pointer;
-    box-shadow: ${p => (p.$active ? '0 6px 14px rgba(255,77,166,0.12)' : '0 2px 6px rgba(0,0,0,0.04)')};
-
-  transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 1;
-
-  &:hover {
-    opacity: 0.8;
-    transform: translateY(-2px);
-    box-shadow: ${(p) => (p.$wide ? "none" : "0 4px 12px rgba(0,0,0,0.08)")};
-  }
-
-  &:active {
-    transform: translateY(0);
-    opacity: 0.9;
-  }
-`;
-
-const AccordionContent = styled.div`
-  max-height: ${(p) => (p.$open ? "500px" : "0")};
-  opacity: ${(p) => (p.$open ? "1" : "0")};
-  overflow: hidden;
-  transition:
-    max-height 2s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s,
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  margin-top: ${(p) => (p.$open ? "0px" : "0")};
-  position: ${(p) => (p.$wide ? "relative" : "static")};
-  transform: ${(p) => (p.$open ? "translateY(0)" : "translateY(-5px)")};
-`;
-const AccordionInner = styled.div`
-  display: grid;
-  grid-template-columns: ${(p) => (p.$wide ? "1.5fr 1fr" : "1fr")};
-  gap: 0;
-  align-items: stretch;
-  width: 100%;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-`;
-
-
-const DetailsShell = styled.div`
-  margin: 0 0 16px 16px;
-  padding: 0px;
-
-  border-radius: 20px 0px 0px 20px;
-  border-top-left-radius: ${(p) => (p.$noTopLeft ? '0px' : '20px')};
-  background: #ffffff;
-  height: ${(p) => (p.$wide ? "100px" : "auto")};
-  min-height: ${(p) => (p.$wide ? "100px" : "auto")};
-  max-height: ${(p) => (p.$wide ? "100px" : "none")};
-  overflow-y: ${(p) => (p.$wide ? "auto" : "visible")};
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: ${(p) => (p.$wide ? "translateX(0)" : "translateX(0)")};
-  opacity: ${(p) => (p.$wide ? "1" : "1")};
-`;
-
- 
-
-// const CompactSectionCard = styled(SectionCard)`
-//   display: flex;
-//   margin: 0;
-//   padding: 12px 16px;
-// `;
-
-const SectionHeaderBar = styled.div`
-
-  margin: ${(p) => (p.$wide ? "0px 0px 0 16px" : "14px 16px 0 16p")};
-    padding: ${(p) => (p.$wide ? "8px 0px" : "12px 14px")};
-
-
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-`;
-
-const SECTIONS = [
+const SECTIONS: Section[] = [
   { k: "ground", label: "Ground Lease", icon: "🏳️" },
   { k: "tower", label: "Tower Lease", icon: "🗼" },
   { k: "utility", label: "Utility Easement", icon: "🧬" },
@@ -374,388 +15,278 @@ const SECTIONS = [
   { k: "insights", label: "Insights", icon: "✴️" },
 ];
 
-const PDFThumbnailViewer = ({ pdfUrl, onPageClick, currentPage }) => {
-  const [pageNumbers, setPageNumbers] = React.useState([]);
-  const canvasRefs = React.useRef([]);
+const Badge: React.FC<{ color: string; size?: "sm" | "md"; children: React.ReactNode }> = ({
+  color,
+  size = "md",
+  children,
+}) => (
+  <span
+    className={`
+      ${size === "sm" ? "w-5 h-5 text-xs" : "w-7 h-7 text-sm"}
+      inline-flex items-center justify-center rounded-full
+      border-2 bg-white font-medium transition-transform duration-200
+      hover:scale-110
+    `}
+    style={{ borderColor: color, color }}
+  >
+    {children}
+  </span>
+);
 
-  useEffect(() => {
-    let cancelled = false;
+const DetailItem: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="border-l-3 border-gray-200 pl-3 text-sm text-foreground">
+    {children}
+  </div>
+);
 
-    const renderThumbnails = async () => {
-      try {
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        const pdf = await loadingTask.promise;
-        const nums = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
-        if (cancelled) return;
-        setPageNumbers(nums);
-
-        // Defer to next tick to ensure canvases are mounted
-        requestAnimationFrame(async () => {
-          for (let i = 0; i < nums.length; i += 1) {
-            if (cancelled) return;
-            const pageIndex = nums[i];
-            const page = await pdf.getPage(pageIndex);
-            const baseViewport = page.getViewport({ scale: 1 });
-            const targetWidth = 96; // match Thumb width
-            const scale = targetWidth / baseViewport.width;
-            const viewport = page.getViewport({ scale });
-
-            const canvas = canvasRefs.current[i];
-            if (!canvas) continue;
-            const ctx = canvas.getContext("2d");
-            canvas.width = Math.max(1, Math.floor(viewport.width));
-            canvas.height = Math.max(1, Math.floor(viewport.height));
-
-            await page.render({ canvasContext: ctx, viewport }).promise;
-          }
-        });
-      } catch {
-        // swallow; can enhance with error UI later
-      }
-    };
-
-    if (pdfUrl) renderThumbnails();
-    return () => {
-      cancelled = true;
-    };
-  }, [pdfUrl]);
-
-  return (
-    <ThumbnailGrid>
-      {pageNumbers.map((num, index) => (
-        <Thumb
-          key={`thumb-${num}`}
-          onClick={() => onPageClick(num)}
-          title={`Page ${num}`}
-          $active={num === currentPage}
-          aria-selected={num === currentPage}
-        >
-          <canvas ref={(el) => (canvasRefs.current[index] = el)} />
-        </Thumb>
-      ))}
-    </ThumbnailGrid>
-  );
-};
-
-const PDFPageCanvas = ({ pdfUrl, pageNumber }) => {
-  const canvasRef = React.useRef(null);
-  const [loading, setLoading] = React.useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const renderPage = async () => {
-      try {
-        setLoading(true);
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(pageNumber || 1);
-        const baseViewport = page.getViewport({ scale: 1 });
-        const targetHeight = 350;
-        const scale = targetHeight / baseViewport.height;
-        const viewport = page.getViewport({ scale });
-
-        const canvas = canvasRef.current;
-        if (!canvas || cancelled) return;
-        const ctx = canvas.getContext("2d");
-        canvas.width = Math.max(1, Math.floor(viewport.width));
-        canvas.height = Math.max(1, Math.floor(viewport.height));
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        if (!cancelled) setLoading(false);
-      } catch {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    renderPage();
-    return () => {
-      cancelled = true;
-    };
-  }, [pdfUrl, pageNumber]);
-
-  return (
-    <CanvasWrap>
-      {loading ? (
-        <SkeletonBox />
-      ) : null}
-      <PageCanvas
-        ref={canvasRef}
-        style={{ opacity: loading ? 0 : 1, transform: loading ? "translateY(6px)" : "translateY(0)" }}
-      />
-    </CanvasWrap>
-  );
-};
-
-const GroundContent = ({ isWide }) => {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const pdfUrl = "/dummy.pdf";
-
-  return (
-    <AccordionInner $wide={isWide}>
-      <DetailsShell $wide={isWide} $noTopLeft>
-        <DetailGrid>
-          <DetailItem>
-            04/01/2016 –{" "}
-            <span style={{ color: "#ff4d4f", fontWeight: 600 }}>03/31/2026</span>
-          </DetailItem>
-          <DetailItem>
-            Monthly Rent
-            <br />
-            <b>$2,345</b>
-          </DetailItem>
-          <DetailItem>
-            Owner
-            <br />
-            John Smith
-          </DetailItem>
-          <DetailItem>
-            Renewal Option
-            <br />
-            3x5 Yr
-          </DetailItem>
-          <DetailItem>
-            Co-location
-            <br />
-            AT&T, Verizon
-          </DetailItem>
-        </DetailGrid>
-        <Hint>
-          <span>✨</span>
-          <span>Landowner signaled rent hike request (~15%)</span>
-        </Hint>
-      </DetailsShell>
-
-    </AccordionInner>
-  );
-};
-
-const TowerContent = ({ isWide }) => {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const pdfUrl = "/dummy.pdf";
-
-  return (
-    <AccordionInner $wide={isWide}>
-      <DetailsShell $wide={isWide} $noTopLeft>
-        <DetailGrid>
-          <DetailItem>
-            Start Date
-            <br />
-            01/01/2018
-          </DetailItem>
-          <DetailItem>
-            Status
-            <br />
-            <b>Active</b>
-          </DetailItem>
-          <DetailItem>
-            Notes
-            <br />
-            No outstanding items
-          </DetailItem>
-          <DetailItem>
-            Revision
-            <br />
-            None
-          </DetailItem>
-        </DetailGrid>
-      </DetailsShell>
-
-    </AccordionInner>
-  );
-};
-
-const UtilityContent = ({ isWide }) => {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const pdfUrl = "/dummy.pdf";
-
-  return (
-    <AccordionInner $wide={isWide}>
-      <DetailsShell $wide={isWide} style={{ borderTopLeftRadius: 0 }}>
-        <DetailGrid>
-          <DetailItem>
-            Utility
-            <br />
-            Power + Fiber
-          </DetailItem>
-          <DetailItem>
-            Status
-            <br />
-            <b>Operational</b>
-          </DetailItem>
-        </DetailGrid>
-      </DetailsShell>
-
-    </AccordionInner>
-  );
-};
-
-const AccessContent = ({ isWide }) => {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const pdfUrl = "/dummy.pdf";
-
-  return (
-    <AccordionInner $wide={isWide}>
-      <DetailsShell $wide={isWide} style={{ borderTopLeftRadius: 0 }}>
-        <DetailGrid>
-          <DetailItem>
-            Access Road
-            <br />
-            Paved, 200m
-          </DetailItem>
-          <DetailItem>
-            Condition
-            <br />
-            Good
-          </DetailItem>
-        </DetailGrid>
-      </DetailsShell>
-
-    </AccordionInner>
-  );
-};
-
-const InsightsContent = () => (
-  <div style={{ padding: "12px 14px" }}>
-    <div style={{ fontWeight: 700, color: "#2b2b2b", marginBottom: "10px" }}>
-      Insights
+const GroundContent: React.FC<{ isWide: boolean }> = ({ isWide }) => (
+  <div className="animate-fade-in">
+    <div className="grid grid-cols-2 gap-3 gap-x-4 mt-3">
+      <DetailItem>
+        04/01/2016 –{" "}
+        <span className="text-red-500 font-semibold">03/31/2026</span>
+      </DetailItem>
+      <DetailItem>
+        Monthly Rent
+        <br />
+        <b>$2,345</b>
+      </DetailItem>
+      <DetailItem>
+        Owner
+        <br />
+        John Smith
+      </DetailItem>
+      <DetailItem>
+        Renewal Option
+        <br />
+        3x5 Yr
+      </DetailItem>
+      <DetailItem>
+        Co-location
+        <br />
+        AT&T, Verizon
+      </DetailItem>
     </div>
-    <p
-      style={{
-        margin: "10px 0",
-        color: "#4a4a4a",
-        fontSize: "13px",
-        lineHeight: "1.5",
-      }}
-    >
+    <div className="flex items-center gap-2 mt-3 text-muted-foreground text-xs">
+      <span>✨</span>
+      <span>Landowner signaled rent hike request (~15%)</span>
+    </div>
+  </div>
+);
+
+const TowerContent: React.FC<{ isWide: boolean }> = ({ isWide }) => (
+  <div className="animate-fade-in">
+    <div className="grid grid-cols-2 gap-3 gap-x-4 mt-3">
+      <DetailItem>
+        Start Date
+        <br />
+        01/01/2018
+      </DetailItem>
+      <DetailItem>
+        Status
+        <br />
+        <b>Active</b>
+      </DetailItem>
+      <DetailItem>
+        Notes
+        <br />
+        No outstanding items
+      </DetailItem>
+      <DetailItem>
+        Revision
+        <br />
+        None
+      </DetailItem>
+    </div>
+  </div>
+);
+
+const UtilityContent: React.FC<{ isWide: boolean }> = ({ isWide }) => (
+  <div className="animate-fade-in">
+    <div className="grid grid-cols-2 gap-3 gap-x-4 mt-3">
+      <DetailItem>
+        Utility
+        <br />
+        Power + Fiber
+      </DetailItem>
+      <DetailItem>
+        Status
+        <br />
+        <b>Operational</b>
+      </DetailItem>
+    </div>
+  </div>
+);
+
+const AccessContent: React.FC<{ isWide: boolean }> = ({ isWide }) => (
+  <div className="animate-fade-in">
+    <div className="grid grid-cols-2 gap-3 gap-x-4 mt-3">
+      <DetailItem>
+        Access Road
+        <br />
+        Paved, 200m
+      </DetailItem>
+      <DetailItem>
+        Condition
+        <br />
+        Good
+      </DetailItem>
+    </div>
+  </div>
+);
+
+const InsightsContent: React.FC = () => (
+  <div className="p-3 animate-fade-in">
+    <div className="font-bold text-foreground mb-3">Insights</div>
+    <p className="my-3 text-foreground text-sm leading-relaxed">
       The ground lease for this site is set to expire on March 15, 2026 (next 6
       months). Landlord has indicated interest in revising terms upward by ~15%.
     </p>
-    <p
-      style={{
-        margin: "10px 0",
-        color: "#4a4a4a",
-        fontSize: "13px",
-        lineHeight: "1.5",
-      }}
-    >
+    <p className="my-3 text-foreground text-sm leading-relaxed">
       Opportunity: Strategically located near a major corridor; relocation
       unlikely.
     </p>
-    <p
-      style={{
-        margin: "10px 0",
-        color: "#4a4a4a",
-        fontSize: "13px",
-        lineHeight: "1.5",
-      }}
-    >
+    <p className="my-3 text-foreground text-sm leading-relaxed">
       Action: Start negotiations by December 2025.
     </p>
   </div>
 );
 
-const SectionCardComponent = ({
-  section,
-  isActive,
-  isOpen,
-  isWide,
-  onToggle,
-  style = {},
-}) => {
-  const { k, label, icon } = section;
+interface SectionCardProps {
+  section: Section;
+  isOpen: boolean;
+  isWide: boolean;
+  onToggle: (key: string) => void;
+}
 
-  const renderContent = () => {
-    switch (k) {
-      case "ground":
-        return <GroundContent isWide={isWide} />;
-      case "tower":
-        return <TowerContent isWide={isWide} />;
-      case "utility":
-        return <UtilityContent isWide={isWide} />;
-      case "access":
-        return <AccessContent isWide={isWide} />;
-      case "insights":
-        return <InsightsContent />;
-      default:
-        return null;
-    }
-  };
+const SectionCard = React.forwardRef<HTMLButtonElement, SectionCardProps>(
+  ({ section, isOpen, isWide, onToggle }, ref) => {
+    const { k, label, icon } = section;
 
-  return (
-    <SectionCard
-      onClick={() => onToggle(k)}
-      aria-expanded={isOpen}
-      $active={isOpen}
-      $wide={isWide}
-      style={style}
-    >
-      <div style={{ width: "100%" }}>
-        {isWide ? (
-          <>
-            <SectionHeaderBar>
-              <SectionHeader>
-                <SectionTitle>
-                  <span>{icon}</span> {label}
-                </SectionTitle>
+    const renderContent = () => {
+      switch (k) {
+        case "ground":
+          return <GroundContent isWide={isWide} />;
+        case "tower":
+          return <TowerContent isWide={isWide} />;
+        case "utility":
+          return <UtilityContent isWide={isWide} />;
+        case "access":
+          return <AccessContent isWide={isWide} />;
+        case "insights":
+          return <InsightsContent />;
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <button
+        ref={ref}
+        onClick={() => onToggle(k)}
+        data-section={k}
+        className={`
+          ${isWide ? "m-2 mx-4" : "m-2 mx-2"}
+          ${isWide ? (isOpen ? "w-[calc(100%-20px)]" : "w-[90%]") : "w-[95%]"}
+          ${isWide ? "p-0" : "p-4"}
+          flex items-start justify-between cursor-pointer
+          transition-all duration-700 ease-out
+          ${
+            isWide
+              ? isOpen
+                ? "rounded-l-xl rounded-r-none border-2 border-r-0 border-pink-light"
+                : "rounded-xl border-2 border-pink-light"
+              : isOpen
+                ? "rounded-xl border-2 border-primary"
+                : "rounded-xl border-2 border-pink-light"
+          }
+          ${isOpen ? "shadow-lg" : "shadow-sm"}
+          hover:opacity-80 hover:-translate-y-0.5 active:translate-y-0
+          ${isWide ? "hover:shadow-none" : "hover:shadow-md"}
+          bg-white
+        `}
+      >
+        <div className="w-full">
+          {isWide ? (
+            <>
+              <div className={`${isOpen ? "mx-0 ml-4" : "mx-4"} py-2`}>
+                <div className="flex items-center justify-between w-full">
+                  <div className="font-bold text-foreground flex items-center gap-3 flex-1">
+                    <span>{icon}</span>
+                    <span>{label}</span>
+                  </div>
+                  {k !== "insights" && (
+                    <div className="flex items-center gap-3">
+                      <Badge color="#1db954">✓</Badge>
+                      <Badge color="#ff7a45">!</Badge>
+                      <Badge color="#ff4da6">≡</Badge>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div
+                className={`
+                  transition-all duration-500 ease-out overflow-hidden
+                  ${isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}
+                `}
+              >
+                <div className="mx-0 mb-4 ml-4 p-0 rounded-l-2xl bg-white">
+                  {renderContent()}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between w-full">
+                <div className="font-bold text-sm text-foreground flex items-center gap-2 flex-1">
+                  <span>{icon}</span>
+                  <span>{label}</span>
+                </div>
                 {k !== "insights" && (
-                  <BadgeRow>
-                    <Badge title="On track" color="#1db954">
-                      ✓
-                    </Badge>
-                    <Badge title="Risk" color="#ff7a45">
-                      !
-                    </Badge>
-                    <Badge title="Notes" color="#ff4da6">
-                      ≡
-                    </Badge>
-                  </BadgeRow>
+                  <div className="flex items-center gap-2">
+                    <Badge color="#1db954" size="sm">✓</Badge>
+                    <Badge color="#ff7a45" size="sm">!</Badge>
+                    <Badge color="#ff4da6" size="sm">≡</Badge>
+                  </div>
                 )}
-              </SectionHeader>
-            </SectionHeaderBar>
-            <AccordionContent $open={isOpen} $wide={isWide}>
-              {renderContent()}
-            </AccordionContent>
-          </>
-        ) : (
-          <>
-            <SectionHeader>
-              <SectionTitle $small>
-                <span>{icon}</span> {label}
-              </SectionTitle>
-              {k !== "insights" && (
-                <BadgeRow>
-                  <Badge title="On track" color="#1db954" $size="sm">
-                    ✓
-                  </Badge>
-                  <Badge title="Risk" color="#ff7a45" $size="sm">
-                    !
-                  </Badge>
-                  <Badge title="Notes" color="#ff4da6" $size="sm">
-                    ≡
-                  </Badge>
-                </BadgeRow>
-              )}
-            </SectionHeader>
-            <AccordionContent $open={isOpen} $wide={isWide}>
-              {renderContent()}
-            </AccordionContent>
-          </>
-        )}
-      </div>
-    </SectionCard>
-  );
-};
+              </div>
+              <div
+                className={`
+                  transition-all duration-500 ease-out overflow-hidden
+                  ${isOpen ? "max-h-[500px] opacity-100 mt-0" : "max-h-0 opacity-0"}
+                `}
+              >
+                {renderContent()}
+              </div>
+            </>
+          )}
+        </div>
+      </button>
+    );
+  }
+);
 
-export default function App({ onClose = () => { } }) {
-  const [wide, setWide] = React.useState(false);
-  const [openKeys, setOpenKeys] = React.useState({
+SectionCard.displayName = "SectionCard";
+
+interface SitePanelProps {
+  onClose?: () => void;
+}
+
+export const SitePanel: React.FC<SitePanelProps> = ({ onClose = () => {} }) => {
+  const [wide, setWide] = useState(false);
+  const [openKeys, setOpenKeys] = useState({
     ground: true,
     tower: false,
     utility: false,
     access: false,
     insights: false,
   });
-  const [activeKey, setActiveKey] = React.useState("ground");
+  const [activeKey, setActiveKey] = useState("ground");
+  const [gapStyle, setGapStyle] = useState({ top: 0, height: 0 });
+  const sectionRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const toggle = (key) => {
+  const toggle = (key: string) => {
     setActiveKey(key);
     setOpenKeys({
       ground: false,
@@ -767,89 +298,194 @@ export default function App({ onClose = () => { } }) {
     });
   };
 
-  const sortedSections = SECTIONS;
+  useEffect(() => {
+    if (!wide) return;
+
+    const updateGap = () => {
+      const sectionEl = sectionRefs.current[activeKey];
+      const previewEl = document.querySelector("[data-preview-shell]");
+      if (!sectionEl || !previewEl) return;
+
+      const sectionRect = sectionEl.getBoundingClientRect();
+      const previewRect = previewEl.getBoundingClientRect();
+      setGapStyle({
+        top: sectionRect.top - previewRect.top,
+        height: sectionRect.height,
+      });
+    };
+
+    updateGap();
+
+    const resizeObserver = new ResizeObserver(updateGap);
+    if (sectionRefs.current[activeKey]) {
+      resizeObserver.observe(sectionRefs.current[activeKey]!);
+    }
+
+    const panelWrap = document.querySelector("[data-panel-wrap]");
+    if (panelWrap) {
+      panelWrap.addEventListener("scroll", updateGap);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+      if (panelWrap) {
+        panelWrap.removeEventListener("scroll", updateGap);
+      }
+    };
+  }, [activeKey, wide]);
+
+  const isLastSection = activeKey === SECTIONS[SECTIONS.length - 1].k;
 
   return (
-    <PanelWrap $wide={wide} onClick={(e) => e.stopPropagation()}>
-      <Header>
+    <div
+      data-panel-wrap
+      onClick={(e) => e.stopPropagation()}
+      className={`
+        fixed top-6 right-6 max-h-[calc(100vh-48px)] overflow-auto
+        ${wide ? "w-[900px]" : "w-[420px]"}
+        bg-gradient-to-br from-white/95 via-pink-50/40 to-white/95
+        backdrop-blur-md
+        border-2 border-primary rounded-2xl
+        shadow-[0_12px_30px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.06)]
+        transition-all duration-700 ease-out
+        animate-scale-in
+      `}
+      style={{
+        background: `
+          radial-gradient(1200px 400px at 100% -50%, rgba(255, 77, 166, 0.06), transparent 60%),
+          radial-gradient(1000px 600px at -10% 10%, rgba(255, 202, 236, 0.18), transparent 60%),
+          rgba(255, 255, 255, 0.93)
+        `,
+      }}
+    >
+      {/* Header */}
+      <header className="p-5 pb-3 flex items-center justify-center relative bg-gradient-to-b from-white to-pink-50/30">
         <div>
-          <HeaderRow>
-            <Title>
-              Site: <TitleStrong>ABCD1234</TitleStrong>
-            </Title>
-            {!wide ? null : (
-              <>
-                <IconBtn aria-label="favorite">☆</IconBtn>
-                <IconBtn
+          <div className="flex items-start justify-between w-full gap-3">
+            <div>
+              <h1 className="text-2xl font-light text-foreground">
+                Site: <span className="font-semibold">ABCD1234</span>
+              </h1>
+              <p className="mt-1 text-xs text-black">Seattle \\ West \\ Northwest</p>
+              <p className="mt-1.5 text-xs text-black">
+                Tower Type: Macro Tower (150 ft)
+              </p>
+            </div>
+            {wide && (
+              <div className="flex gap-2">
+                <button
+                  aria-label="favorite"
+                  className="w-8 h-8 rounded-xl border-2 border-pink-light bg-white text-primary
+                    flex items-center justify-center cursor-pointer shadow-md
+                    transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
+                >
+                  ☆
+                </button>
+                <button
                   aria-label="expand"
                   onClick={() => setWide((w) => !w)}
                   title="Toggle wide view"
+                  className="w-8 h-8 rounded-xl border-2 border-pink-light bg-white text-primary
+                    flex items-center justify-center cursor-pointer shadow-md
+                    transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
                 >
                   ➕
-                </IconBtn>
-              </>
+                </button>
+              </div>
             )}
-          </HeaderRow>
-          <SubTitle>Seattle \\ West \\ Northwest</SubTitle>
-          <SubTitleSecondary>
-            Tower Type: Macro Tower (150 ft)
-          </SubTitleSecondary>
+          </div>
         </div>
-        <HeaderRight>
-          {wide ? (
-            <IconBtn aria-label="close" onClick={onClose} title="Close">
-              ✖
-            </IconBtn>
-          ) : (
+        <div className="absolute top-3 right-5 flex items-center gap-2">
+          {!wide ? (
             <>
-                <IconBtn aria-label="favorite">☆</IconBtn>
-              <IconBtn
+              <button
+                aria-label="favorite"
+                className="w-8 h-8 rounded-xl border-2 border-pink-light bg-white text-primary
+                  flex items-center justify-center cursor-pointer shadow-md
+                  transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
+              >
+                ☆
+              </button>
+              <button
                 aria-label="expand"
                 onClick={() => setWide((w) => !w)}
                 title="Toggle wide view"
+                className="w-8 h-8 rounded-xl border-2 border-pink-light bg-white text-primary
+                  flex items-center justify-center cursor-pointer shadow-md
+                  transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
               >
                 ➕
-              </IconBtn>
+              </button>
             </>
+          ) : (
+            <button
+              aria-label="close"
+              onClick={onClose}
+              title="Close"
+              className="w-8 h-8 rounded-xl border-2 border-pink-light bg-white text-primary
+                flex items-center justify-center cursor-pointer shadow-md
+                transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              ✖
+            </button>
           )}
-        </HeaderRight>
-      </Header>
+        </div>
+      </header>
+
+      {/* Content */}
       <div>
         {wide ? (
-          <AccordionInner $wide>
-            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              {sortedSections.map((section) => (
-                <SectionCardComponent
+          <div className="grid grid-cols-[1fr_auto] gap-0 items-stretch">
+            {/* Left side - Sections */}
+            <div className="flex flex-col h-full">
+              {SECTIONS.map((section) => (
+                <SectionCard
                   key={section.k}
+                  ref={(el) => (sectionRefs.current[section.k] = el)}
                   section={section}
-                  isActive={activeKey === section.k}
                   isOpen={openKeys[section.k]}
                   isWide={wide}
-                  onToggle={toggle} style={{
-                    margin: "0px 4px", // Remove right margin
-                    borderRadius: "12px 0 0 12px", // Only left corners rounded
-                    borderRight: "none", // No right border
-                    width: "100%",
-                  }}
+                  onToggle={toggle}
                 />
               ))}
             </div>
-            <PreviewShell $wide style={{ padding: "0"}}>
 
-              <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={1} />
+            {/* Right side - Preview Shell */}
+            <div
+              data-preview-shell
+              className={`
+                relative mr-4 mb-4 p-3.5 bg-gradient-to-b from-white to-pink-50/30
+                border-2 border-l-0 border-pink-light
+                grid grid-cols-[3fr_104px] gap-3
+                transition-all duration-700 ease-out
+                ${isLastSection ? "rounded-br-2xl rounded-tr-none" : "rounded-r-2xl"}
+                before:content-[''] before:absolute before:top-0 before:left-[-2px]
+                before:w-[2px] before:h-full before:bg-pink-light
+                after:content-[''] after:absolute after:left-[-2px]
+                after:w-[2px] after:bg-gradient-to-b after:from-white after:to-pink-50/30
+                after:transition-all after:duration-500 after:ease-out
+                after:rounded-full
+              `}
+            >
+              <style>{`
+                [data-preview-shell]::after {
+                  top: ${gapStyle.top}px;
+                  height: ${gapStyle.height}px;
+                }
+              `}</style>
+              <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={currentPage} />
               <PDFThumbnailViewer
                 pdfUrl="/dummy.pdf"
-                onPageClick={() => { }}
-                currentPage={1}
+                onPageClick={setCurrentPage}
+                currentPage={currentPage}
               />
-            </PreviewShell>
-          </AccordionInner>
+            </div>
+          </div>
         ) : (
-          sortedSections.map((section) => (
-            <SectionCardComponent
+          SECTIONS.map((section) => (
+            <SectionCard
               key={section.k}
               section={section}
-              isActive={activeKey === section.k}
               isOpen={openKeys[section.k]}
               isWide={wide}
               onToggle={toggle}
@@ -857,6 +493,6 @@ export default function App({ onClose = () => { } }) {
           ))
         )}
       </div>
-    </PanelWrap>
+    </div>
   );
-}
+};
