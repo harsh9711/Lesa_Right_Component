@@ -1,6 +1,6 @@
 import './App.css';
-import NationalStats from './components/NationalCard';
-import Seattle from './components/Seattle';
+import RightComponent from './components/RightComponent';
+
 
 function App() {
   return (
@@ -9,8 +9,7 @@ function App() {
         position:"relative"
       }}
     >
-      <NationalStats/>
-      <Seattle/>
+      <RightComponent/>
     </div>
   );
 }
