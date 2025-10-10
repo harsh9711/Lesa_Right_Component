@@ -238,7 +238,7 @@ const ThumbnailGrid = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 68px;
   width: 104px;
   align-items: center;
   max-height: 300px;
@@ -690,7 +690,7 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
                 <SectionTitle>
                   <span>{icon}</span> {label}
                 </SectionTitle>
-                {k !== "insights" && (
+                {/* {k !== "insights" && (
                   <BadgeRow>
                     <Badge title="On track" color="#1db954">
                       ✓
@@ -702,7 +702,7 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
                       ≡
                     </Badge>
                   </BadgeRow>
-                )}
+                )} */}
               </SectionHeader>
             </SectionHeaderBar>
             <AccordionContent $open={isOpen} $wide={isWide}>
@@ -870,7 +870,7 @@ export default function App({ onClose = () => { } }) {
               $wide
               $gapTop={`${gapStyle.top}px`}
               $gapHeight={`${gapStyle.height}px`}
-            $isLastOpen={activeKey === SECTIONS[SECTIONS.length - 1].k} >
+              $isLastOpen={activeKey === SECTIONS[SECTIONS.length - 1].k} >
               <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={1} />
               <PDFThumbnailViewer pdfUrl="/dummy.pdf" onPageClick={() => { }} currentPage={1} />
             </PreviewShell>
