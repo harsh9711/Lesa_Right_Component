@@ -834,12 +834,8 @@ export default function App({ onClose = () => { } }) {
                 />
               ))}
             </div>
-            <PreviewShell
-              $wide
-              style={{
-                 borderRadius: "0px 20px 20px 20px", // Only right corners rounded
-               }}
-            >
+            <PreviewShell $wide style={{ padding: "0"}}>
+
               <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={1} />
               <PDFThumbnailViewer
                 pdfUrl="/dummy.pdf"
