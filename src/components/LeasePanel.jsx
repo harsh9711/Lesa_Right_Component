@@ -149,9 +149,11 @@ const PreviewShell = styled.div`
   &::after {
     content: "";
     position: absolute;
+      border-top-right-radius: 24px;
+  border-bottom-right-radius: 24px;
     left: -2px;
     top: ${(p) => p.$gapTop || "0px"};
-    height: ${(p) => p.$gapHeight || "0px"};
+height: calc(${(p) => p.$gapHeight || "0px"} - 2px);
     width: 2px; 
     background: #fff;
     border-top-right-radius: ${(p) => (p.$isLastOpen ? "25px" : "24px")};
@@ -289,7 +291,6 @@ const SectionCard = styled.button`
   padding: ${(p) => (p.$wide ? "0px" : "16px")};
   margin: ${(p) => (p.$wide ? "2px 20px" : "8px 8px")};
    background: #fff;
-
   border: ${(p) =>
     p.$active && p.$wide
       ? "2px solid #ffd1e8"
@@ -302,7 +303,7 @@ const SectionCard = styled.button`
   ${(p) =>
     p.$active && p.$wide
       ? "border-right: none;"
-    : "2px solid #f1d0e3"};
+      : "2px solid #f1d0e3"};
 
   display: flex;
   align-items: flex-start;
@@ -697,10 +698,10 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
                       <img src="/assets/green.png" alt="On track" style={{ width: '12px', height: '12px' }} />
                     </Badge>
                     <Badge title="Risk" color="#ff7a45">
-                      <img src="/assets/red.png"  alt="Risk" style={{ width: '12px', height: '12px' }} />
+                      <img src="/assets/red.png" alt="Risk" style={{ width: '12px', height: '12px' }} />
                     </Badge>
                     <Badge title="Notes" color="#ff4da6">
-                      <img src="/assets/save.png"  alt="Notes" style={{ width: '12px', height: '12px' }} />
+                      <img src="/assets/save.png" alt="Notes" style={{ width: '12px', height: '12px' }} />
                     </Badge>
 
                   </BadgeRow>
@@ -714,24 +715,24 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
         ) : (
           <>
             <SectionHeader>
-                <SectionTitle>
-                  {icon && <img src={icon} alt={label} style={{ width: 18, height: 18 }} />}
-                  <span style={{ marginLeft: 6 }}>{label}</span>
-                </SectionTitle>
-                {k !== "insights" && (
-                  <BadgeRow>
-                    <Badge title="On track" color="#1db954">
-                      <img src="/assets/green.png" alt="On track" style={{ width: '12px', height: '12px' }} />
-                    </Badge>
-                    <Badge title="Risk" color="#ff7a45">
-                      <img src="/assets/red.png" alt="Risk" style={{ width: '12px', height: '12px' }} />
-                    </Badge>
-                    <Badge title="Notes" color="#ff4da6">
-                      <img src="/assets/save.png" alt="Notes" style={{ width: '12px', height: '12px' }} />
-                    </Badge>
+              <SectionTitle>
+                {icon && <img src={icon} alt={label} style={{ width: 18, height: 18 }} />}
+                <span style={{ marginLeft: 6 }}>{label}</span>
+              </SectionTitle>
+              {k !== "insights" && (
+                <BadgeRow>
+                  <Badge title="On track" color="#1db954">
+                    <img src="/assets/green.png" alt="On track" style={{ width: '12px', height: '12px' }} />
+                  </Badge>
+                  <Badge title="Risk" color="#ff7a45">
+                    <img src="/assets/red.png" alt="Risk" style={{ width: '12px', height: '12px' }} />
+                  </Badge>
+                  <Badge title="Notes" color="#ff4da6">
+                    <img src="/assets/save.png" alt="Notes" style={{ width: '12px', height: '12px' }} />
+                  </Badge>
 
-                  </BadgeRow>
-                )}
+                </BadgeRow>
+              )}
             </SectionHeader>
             <AccordionContent $open={isOpen} $wide={isWide}>
               {renderContent()}
@@ -783,10 +784,17 @@ export default function App({ onClose = () => { } }) {
 
       const sectionRect = sectionEl.getBoundingClientRect();
       const previewRect = previewEl.getBoundingClientRect();
+      const style = window.getComputedStyle(sectionEl);
+      const paddingTop = parseFloat(style.paddingTop);
+      const paddingBottom = parseFloat(style.paddingBottom);
+      const borderTop = parseFloat(style.borderTopWidth);
+      const borderBottom = parseFloat(style.borderBottomWidth);
+
       setGapStyle({
-        top: sectionRect.top - previewRect.top,
-        height: sectionRect.height,
+        top: sectionRect.top - previewRect.top + borderTop + paddingTop,
+        height: sectionRect.height - paddingTop - paddingBottom - borderTop - borderBottom,
       });
+
     };
 
     updateGap();
@@ -823,14 +831,14 @@ export default function App({ onClose = () => { } }) {
                     src="/assets/wide.png"
                     alt="Favorite"
                     style={{ width: '25px', height: '25px' }}
-                  /> 
-                </IconBtn> 
-                 <IconBtn aria-label="favorite">
+                  />
+                </IconBtn>
+                <IconBtn aria-label="favorite">
                   <img
                     src="/assets/starshape.png" alt="Expand"
                     style={{ width: '20px', height: '20px' }}
 
-                   />
+                  />
                 </IconBtn>
               </>
             )}
@@ -842,7 +850,7 @@ export default function App({ onClose = () => { } }) {
         </div>
         <HeaderRight>
           {wide ? (
-          <IconBtn aria-label="close" onClick={onClose} title="Close">
+            <IconBtn aria-label="close" onClick={onClose} title="Close">
               <img
                 src="/assets/cross.png" alt="Cross"
                 style={{ width: '25px', height: '25px' }}
@@ -850,24 +858,24 @@ export default function App({ onClose = () => { } }) {
             </IconBtn>
           ) : (
             <>
-              
 
-                <IconBtn
-                  aria-label="expand"
-                  onClick={() => setWide((w) => !w)}
-                  title="Toggle wide view"
-                >
-                  <img
-                    src="/assets/wide.png"
-                    alt="Favorite"
-                    style={{ width: '25px', height: '25px' }}
-                  />
-                </IconBtn>  <IconBtn aria-label="favorite">
-                  <img
-                    src="/assets/starshape.png" alt="Expand"
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                </IconBtn>
+
+              <IconBtn
+                aria-label="expand"
+                onClick={() => setWide((w) => !w)}
+                title="Toggle wide view"
+              >
+                <img
+                  src="/assets/wide.png"
+                  alt="Favorite"
+                  style={{ width: '25px', height: '25px' }}
+                />
+              </IconBtn>  <IconBtn aria-label="favorite">
+                <img
+                  src="/assets/starshape.png" alt="Expand"
+                  style={{ width: '20px', height: '20px' }}
+                />
+              </IconBtn>
 
             </>
           )}
