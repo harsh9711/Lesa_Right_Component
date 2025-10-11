@@ -146,7 +146,7 @@ border-radius: ${(p) =>
     top: 0;
     left: -2px;
     width: 2px;
-    height: 100%;
+    height: 98%;
     background: #f1d0e3;
   }
 
@@ -303,7 +303,7 @@ const SectionCard = styled.button`
   ${(p) =>
     p.$active && p.$wide
       ? "border-right: none;"
-      : ""};
+    : "2px solid #f1d0e3"};
 
   display: flex;
   align-items: flex-start;
@@ -311,12 +311,9 @@ const SectionCard = styled.button`
   width: ${(p) =>
     p.$wide ? (p.$active ? "calc(100% - 20px)" : "90%") : "95%"};
   transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
- border-radius: ${(p) =>
-    p.$wide
-      ? p.$active
-        ? "12px 0 0 12px" // open section, left side curved, right side flat
-        : "12px 12px 12px 12px" // closed section, fully rounded
-      : "12px"};  cursor: pointer;
+
+    border-radius: 12px;
+       cursor: pointer;
   box-shadow: ${(p) =>
     p.$active
       ? "0 6px 14px rgba(255,77,166,0.12)"
@@ -849,10 +846,10 @@ export default function App({ onClose = () => { } }) {
         {wide ? (
           <AccordionInner $wide>
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              {sortedSections.map((section) => (
+              {sortedSections.map((section, idx) => (
                 <SectionCardComponent
-                  ref={(el) => (sectionRefs.current[section.k] = el)}
                   key={section.k}
+                  ref={(el) => (sectionRefs.current[section.k] = el)}
                   section={section}
                   activeKey={activeKey}
                   isActive={activeKey === section.k}
@@ -860,10 +857,19 @@ export default function App({ onClose = () => { } }) {
                   isWide={wide}
                   onToggle={toggle}
                   style={{
-                    borderRadius: "12px 0 0 12px",
+                    borderTopLeftRadius: idx === 0 ? "12px" : "12px",
+                    borderBottomLeftRadius:
+                      idx === sortedSections.length - 1 ? "12px" : "12px",
+
+                    // 👉 ADD THESE LINES 👇
+                    borderTopRightRadius:
+                      activeKey === section.k ? "0px" : "12px",
+                    borderBottomRightRadius:
+                      activeKey === section.k ? "0px" : "12px",
                   }}
                 />
               ))}
+
             </div>
             <PreviewShell
               data-preview-shell
