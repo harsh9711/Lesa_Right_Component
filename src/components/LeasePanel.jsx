@@ -81,34 +81,28 @@ const HeaderRow = styled.div`
 const IconBtn = styled.button`
   width: 32px;
   height: 32px;
-  border-radius: 10px;
-  border: 2px solid #ffd1e8;
   background: #fff;
   color: #ff4da6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
   outline: none;
+  border: none; 
 
   &:hover {
     transform: scale(1.05);
     opacity: 0.8;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   }
 
   &:active {
     transform: scale(0.95);
     opacity: 0.9;
   }
-
-  &:focus-visible {
-    box-shadow: 0 0 0 3px rgba(255, 77, 166, 0.25), 0 6px 15px rgba(0, 0, 0, 0.1);
-  }
 `;
+
 
 const SectionHeader = styled.div`
   display: flex;
@@ -131,52 +125,57 @@ const PreviewShell = styled.div`
   padding: 14px;
   border: 2px solid #f1d0e3;
   border-left: none;
-border-radius: ${(p) =>
-    p.$isLastOpen ? "0px 20px 20px 0px" : "0px 20px 20px 20px"};  border-top-right-radius: ${(p) => (p.$noTopRight ? '0px' : '20px')};
-  background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
+  border-radius: 0px 20px 20px 20px;
+  border-top-right-radius: ${(p) => (p.$noTopRight ? "0px" : "20px")};
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: ${(p) => (p.$isLastOpen ? "0px" : "20px")};
+  background: #fff;
   display: grid;
   grid-template-columns: 3fr 104px;
   gap: 12px;
   position: relative;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 
-   &::before {
+  &::before {
     content: "";
     position: absolute;
     top: 0;
     left: -2px;
     width: 2px;
-    height: 98%;
+    height: 97.5%;
     background: #f1d0e3;
   }
 
-   &::after {
+  &::after {
     content: "";
     position: absolute;
     left: -2px;
     top: ${(p) => p.$gapTop || "0px"};
     height: ${(p) => p.$gapHeight || "0px"};
-    width: 2px;
-    background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
-    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 2px; 
+    background: #fff;
+    border-top-right-radius: ${(p) => (p.$isLastOpen ? "25px" : "24px")};
+    border-bottom-right-radius: ${(p) => (p.$isLastOpen ? "25px" : "24px")};
+    transition:
+      top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 `;
+
 
 const BadgeRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
 `;
 
 const Badge = styled.span`
-  width: ${(p) => (p.$size === 'sm' ? '20px' : '28px')};
-  height: ${(p) => (p.$size === 'sm' ? '20px' : '28px')};
+  width: ${(p) => (p.$size === 'sm' ? '40px' : '28px')};
+  height: ${(p) => (p.$size === 'sm' ? '40px' : '28px')};
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 2px solid ${(p) => p.color || "#ccc"};
-  color: ${(p) => p.color || "#555"};
   background: #fff;
   font-size: ${(p) => (p.$size === 'sm' ? '12px' : '14px')};
 `;
@@ -288,7 +287,7 @@ const Thumb = styled.div`
 
 const SectionCard = styled.button`
   padding: ${(p) => (p.$wide ? "0px" : "16px")};
-  margin: ${(p) => (p.$wide ? "8px 16px" : "8px 8px")};
+  margin: ${(p) => (p.$wide ? "2px 20px" : "8px 8px")};
    background: #fff;
 
   border: ${(p) =>
@@ -312,7 +311,9 @@ const SectionCard = styled.button`
     p.$wide ? (p.$active ? "calc(100% - 20px)" : "90%") : "95%"};
   transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    border-radius: 12px;
+    border-radius: 20px;
+     border-top-right-radius: ${(p) => (p.$active ? "24px" : "12px")};
+  border-bottom-right-radius: ${(p) => (p.$active ? "24px" : "12px")};
        cursor: pointer;
   box-shadow: ${(p) =>
     p.$active
@@ -341,11 +342,12 @@ const AccordionContent = styled.div`
   opacity: ${(p) => (p.$open ? "1" : "0")};
   overflow: hidden;
   transition:
-    max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+     max-height 1s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+    opacity 0.5s ease,
+    transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
   margin-top: ${(p) => (p.$open ? "0px" : "0")};
   position: ${(p) => (p.$wide ? "relative" : "static")};
-  transform: ${(p) => (p.$open ? "translateY(0)" : "translateY(-5px)")};
+  transform: ${(p) => (p.$open ? "translateY(0)" : "translateY(-10px) scale(0.98)")};
 `;
 const AccordionInner = styled.div`
   display: grid;
@@ -380,11 +382,11 @@ const SectionHeaderBar = styled.div`
 `;
 
 const SECTIONS = [
-  { k: "ground", label: "Ground Lease", icon: "🏳️" },
-  { k: "tower", label: "Tower Lease", icon: "🗼" },
-  { k: "utility", label: "Utility Easement", icon: "🧬" },
-  { k: "access", label: "Access Easement", icon: "🔗" },
-  { k: "insights", label: "Insights", icon: "✴️" },
+  { k: "ground", label: "Ground Lease", icon: '/assets/flag.png' },
+  { k: "tower", label: "Tower Lease", icon: 'assets/tower.png' },
+  { k: "utility", label: "Utility Easement", icon: 'assets/sun.png' },
+  { k: "access", label: "Access Easement", icon: 'assets/sketch.png' },
+  { k: "insights", label: "Insights", icon: 'assets/star.png' },
 ];
 
 const PDFThumbnailViewer = ({ pdfUrl, onPageClick, currentPage }) => {
@@ -635,7 +637,7 @@ const InsightsContent = () => (
       Opportunity: Strategically located near a major corridor; relocation
       unlikely.
     </p>
-    <p
+    {/* <p
       style={{
         margin: "10px 0",
         color: "#4a4a4a",
@@ -644,7 +646,7 @@ const InsightsContent = () => (
       }}
     >
       Action: Start negotiations by December 2025.
-    </p>
+    </p> */}
   </div>
 );
 
@@ -685,21 +687,24 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
             <SectionHeaderBar>
               <SectionHeader>
                 <SectionTitle>
-                  <span>{icon}</span> {label}
+                  {icon && <img src={icon} alt={label} style={{ width: 18, height: 18 }} />}
+                  <span style={{ marginLeft: 6 }}>{label}</span>
                 </SectionTitle>
-                {/* {k !== "insights" && (
+
+                {k !== "insights" && (
                   <BadgeRow>
                     <Badge title="On track" color="#1db954">
-                      ✓
+                      <img src="/assets/green.png" alt="On track" style={{ width: '12px', height: '12px' }} />
                     </Badge>
                     <Badge title="Risk" color="#ff7a45">
-                      !
+                      <img src="/assets/red.png"  alt="Risk" style={{ width: '12px', height: '12px' }} />
                     </Badge>
                     <Badge title="Notes" color="#ff4da6">
-                      ≡
+                      <img src="/assets/save.png"  alt="Notes" style={{ width: '12px', height: '12px' }} />
                     </Badge>
+
                   </BadgeRow>
-                )} */}
+                )}
               </SectionHeader>
             </SectionHeaderBar>
             <AccordionContent $open={isOpen} $wide={isWide}>
@@ -709,22 +714,24 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
         ) : (
           <>
             <SectionHeader>
-              <SectionTitle $small>
-                <span>{icon}</span> {label}
-              </SectionTitle>
-              {k !== "insights" && (
-                <BadgeRow>
-                  <Badge title="On track" color="#1db954" $size="sm">
-                    ✓
-                  </Badge>
-                  <Badge title="Risk" color="#ff7a45" $size="sm">
-                    !
-                  </Badge>
-                  <Badge title="Notes" color="#ff4da6" $size="sm">
-                    ≡
-                  </Badge>
-                </BadgeRow>
-              )}
+                <SectionTitle>
+                  {icon && <img src={icon} alt={label} style={{ width: 18, height: 18 }} />}
+                  <span style={{ marginLeft: 6 }}>{label}</span>
+                </SectionTitle>
+                {k !== "insights" && (
+                  <BadgeRow>
+                    <Badge title="On track" color="#1db954">
+                      <img src="/assets/green.png" alt="On track" style={{ width: '12px', height: '12px' }} />
+                    </Badge>
+                    <Badge title="Risk" color="#ff7a45">
+                      <img src="/assets/red.png" alt="Risk" style={{ width: '12px', height: '12px' }} />
+                    </Badge>
+                    <Badge title="Notes" color="#ff4da6">
+                      <img src="/assets/save.png" alt="Notes" style={{ width: '12px', height: '12px' }} />
+                    </Badge>
+
+                  </BadgeRow>
+                )}
             </SectionHeader>
             <AccordionContent $open={isOpen} $wide={isWide}>
               {renderContent()}
@@ -807,13 +814,23 @@ export default function App({ onClose = () => { } }) {
             </Title>
             {!wide ? null : (
               <>
-                <IconBtn aria-label="favorite">☆</IconBtn>
                 <IconBtn
                   aria-label="expand"
                   onClick={() => setWide((w) => !w)}
                   title="Toggle wide view"
                 >
-                  ➕
+                  <img
+                    src="/assets/wide.png"
+                    alt="Favorite"
+                    style={{ width: '25px', height: '25px' }}
+                  /> 
+                </IconBtn> 
+                 <IconBtn aria-label="favorite">
+                  <img
+                    src="/assets/starshape.png" alt="Expand"
+                    style={{ width: '20px', height: '20px' }}
+
+                   />
                 </IconBtn>
               </>
             )}
@@ -825,19 +842,33 @@ export default function App({ onClose = () => { } }) {
         </div>
         <HeaderRight>
           {wide ? (
-            <IconBtn aria-label="close" onClick={onClose} title="Close">
-              ✖
+          <IconBtn aria-label="close" onClick={onClose} title="Close">
+              <img
+                src="/assets/cross.png" alt="Cross"
+                style={{ width: '25px', height: '25px' }}
+              />
             </IconBtn>
           ) : (
             <>
-              <IconBtn aria-label="favorite">☆</IconBtn>
-              <IconBtn
-                aria-label="expand"
-                onClick={() => setWide((w) => !w)}
-                title="Toggle wide view"
-              >
-                ➕
-              </IconBtn>
+              
+
+                <IconBtn
+                  aria-label="expand"
+                  onClick={() => setWide((w) => !w)}
+                  title="Toggle wide view"
+                >
+                  <img
+                    src="/assets/wide.png"
+                    alt="Favorite"
+                    style={{ width: '25px', height: '25px' }}
+                  />
+                </IconBtn>  <IconBtn aria-label="favorite">
+                  <img
+                    src="/assets/starshape.png" alt="Expand"
+                    style={{ width: '20px', height: '20px' }}
+                  />
+                </IconBtn>
+
             </>
           )}
         </HeaderRight>
@@ -858,17 +889,14 @@ export default function App({ onClose = () => { } }) {
                   onToggle={toggle}
                   style={{
                     borderTopLeftRadius: idx === 0 ? "12px" : "12px",
-                    borderBottomLeftRadius:
-                      idx === sortedSections.length - 1 ? "12px" : "12px",
+                    borderBottomLeftRadius: idx === sortedSections.length - 1 ? "12px" : "12px",
 
-                    // 👉 ADD THESE LINES 👇
-                    borderTopRightRadius:
-                      activeKey === section.k ? "0px" : "12px",
-                    borderBottomRightRadius:
-                      activeKey === section.k ? "0px" : "12px",
+                    borderTopRightRadius: activeKey === section.k ? "0px" : "12px",
+                    borderBottomRightRadius: activeKey === section.k ? "0px" : "12px",
                   }}
                 />
               ))}
+
 
             </div>
             <PreviewShell
