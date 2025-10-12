@@ -1,5 +1,5 @@
 import './App.css';
-import RightComponent from './components/RightComponent';
+import RightComponent from './components/RigthPanel/index.jsx';
 
 
 function App() {

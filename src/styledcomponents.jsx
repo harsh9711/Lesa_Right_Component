@@ -7,10 +7,10 @@ export const Container = styled.div`
   align-items: center;
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.25);
   width: 408px;
   box-sizing: border-box;
-  padding: 24px;
+  padding: 0 24px 24px 24px;
   height:680px;
   position: absolute;
   right: 20px;
@@ -42,6 +42,7 @@ export const LegendContainer = styled.div`
 export const LegendItem = styled.div`
   display: flex;
   align-items: center;
+  gap:6px;
 `;
 export const LegendIcon = styled.span`
   width: 10px;
@@ -50,8 +51,18 @@ export const LegendIcon = styled.span`
   display: inline-block;
 `;
 export const LegendLabel = styled.span`
-  margin-left: 4px;
-  font-size: 12px;
+  font-family: Poppins;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 13px;
+  leading-trim: CAP_HEIGHT;
+  line-height: 10px;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: bottom;
+  color: rgba(51, 51, 51, 0.7);
+
+
 `;
 
 /* Donut */

@@ -31,6 +31,10 @@
 }
 
 /* custom Legend */
+*{
+  /* margin: 0;
+  padding: 0; */
+}
 .custom-legend{
   display: flex;
   justify-content: space-around;
@@ -168,10 +172,9 @@ p {
   margin: 0;
 }
 .market{
-  font-size: 13px !important;
   color: #707070;
   font-size: 'Poppins';
-  text-align: center;
+  text-align: left;
   font-weight: 400;
   width: 100%;
   margin: 0;

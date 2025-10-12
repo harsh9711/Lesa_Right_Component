@@ -43,19 +43,19 @@ import {
 import ZoomIcon from "../asset/zoomIcon";
 
 const donutData = [
-  { name: "<1 Yr", value: 224, color: "#EC6140" },
-  { name: "> 2 Yrs", value: 1000, color: "#2D7F6B" },
-  { name: "<1-2 Yrs", value: 326, color: "#FBAD42" },
+  { name: "<1 Yr ", value: 1050, color: "#2D7F6B" },
+  { name: "> 2 Yrs ", value: 500, color: "#FBAD42" },
+  { name: "<1-2 Yrs ", value: 126, color: "#EC6140" },
   
 ];
 
 const forecastData = [
-  { quarter: "Q3 '25", lessThan1Yr: 60, oneToTwoYrs: 50, moreThan2Yrs: 10,total:120 },
-  { quarter: "Q4 '25", lessThan1Yr: 60, oneToTwoYrs: 48, moreThan2Yrs: 12,total:120 },
-  { quarter: "Q1 '26", lessThan1Yr: 60, oneToTwoYrs: 45, moreThan2Yrs: 15,total:120 },
-  { quarter: "Q2 '26", lessThan1Yr: 60, oneToTwoYrs: 40, moreThan2Yrs: 20,total:120 },
-  { quarter: "Q3 '26", lessThan1Yr: 60, oneToTwoYrs: 35, moreThan2Yrs: 25,total:120 },
-  { quarter: "Q4 '26", lessThan1Yr: 60, oneToTwoYrs: 30, moreThan2Yrs: 30,total:120 },
+  { quarter: "Q3 '25", lessThan1Yr: 60, oneToTwoYrs: 50, moreThan2Yrs: 10,total:122 },
+  { quarter: "Q4 '25", lessThan1Yr: 60, oneToTwoYrs: 48, moreThan2Yrs: 12,total:122 },
+  { quarter: "Q1 '26", lessThan1Yr: 60, oneToTwoYrs: 45, moreThan2Yrs: 15,total:122 },
+  { quarter: "Q2 '26", lessThan1Yr: 60, oneToTwoYrs: 40, moreThan2Yrs: 20,total:122 },
+  { quarter: "Q3 '26", lessThan1Yr: 60, oneToTwoYrs: 35, moreThan2Yrs: 25,total:122 },
+  { quarter: "Q4 '26", lessThan1Yr: 60, oneToTwoYrs: 30, moreThan2Yrs: 30,total:122 },
 ];
 
   const CustomBar = ({ fill, x, y, width, height, index, activeIndex }) => {
@@ -67,9 +67,9 @@ const forecastData = [
       <g>
         
         <rect
-          x={x-38}
-          y={y}
-          width={width + 15}
+          x={x-42}
+          y={y-4}
+          width={43}
           height={height+30}
           fill={"#d6d6d641"}
           rx={5}
@@ -82,7 +82,7 @@ const forecastData = [
         <line
           x1={x - 38}
           y1={y + height + 30} // bottom of rect
-          x2={x - 38 + width + 15}
+          x2={x - 38 + width + 36}
           y2={y + height + 30}
           stroke="#8887877c"
           strokeWidth={4}
@@ -104,7 +104,9 @@ export default function RightComponent() {
           fontWeight:'500',
           fontSize:'13px',
           verticalAlign:'bottom',
-          fontFamily:'Poppins'
+          fontFamily:'Poppins',
+          color: "rgba(51, 51, 51, 1)"
+
         }}
       >Leases expiring in</p>
       <div 
@@ -112,7 +114,7 @@ export default function RightComponent() {
           width:"100%",
           display:'flex',
           justifyContent:'center',
-          gap:'6px',
+          gap:'16px',
           padding:'0 10px 0 10px'
         }}
       >
@@ -129,31 +131,17 @@ export default function RightComponent() {
 
   //Custom Tooltip
   const CustomTooltip = ({ active, payload,coordinate}) => {
-    useEffect(()=>{  
-      const handleMouseMove=(e)=>{
-        setCorrdinate({x:e.clientX,y:e.clientY})
-      }
-      setTimeout(()=>{
-        window.addEventListener('mousemove',handleMouseMove)
-      },1000)
-      
-      return ()=>{
-        window.removeEventListener('mousemove',handleMouseMove)
-      }
-    },[])
+   
     if (active && payload && payload.length) {
-      const boundryClient=chartRef.current.getBoundingClientRect()
-      console.log(realCorrdinate,boundryClient)
-      
+    
       const item = payload[0].payload;
-      if(realCorrdinate.x<boundryClient.x || realCorrdinate.y<boundryClient.y)return null
       return (
         <TooltipContainer 
           style={{
             transition: "all 0.5s ease-in",
-            position:"fixed",
-            left:boundryClient.right<realCorrdinate.x+50?boundryClient.left+10:realCorrdinate.x,
-            top:realCorrdinate.y+10
+            position:"absolute",
+            left:coordinate.x,
+            top:coordinate.y
           }}
         >
           <TooltipHeading>National</TooltipHeading>
@@ -184,7 +172,7 @@ export default function RightComponent() {
             </div>
         </Header>
       <DonutWrapper>
-        <ResponsiveContainer height={250}>
+        <ResponsiveContainer width={"100%"} height={250}>
           <PieChart ref={chartRef}>
             <Legend
               verticalAlign="bottom"
@@ -236,21 +224,21 @@ export default function RightComponent() {
                <ResponsiveContainer width="100%" height={120}>
                  <BarChart data={forecastData} 
                     margin={{left:20,right:20}}
-                    barCategoryGap={0}
+                    barCategoryGap={12}
                   >
                     <XAxis
                       dataKey="quarter"
-                       padding={{ left: -10, right: -10 }}
                       axisLine={false}
                       tickLine={false}
                       tick={({ x, y, payload }) => (
                         <text
-                          x={x-15} 
+                          x={x-2} 
                           y={y + 10}
                           textAnchor="middle"
-                          fill="#333"
+                          fill="rgba(30, 30, 31, 1)"
                           fontSize={10}
-                          fontWeight={500}
+                          fontWeight={400}
+                          fontFamily="Inter"
                         >
                           {payload.value}
                         </text>
@@ -263,13 +251,14 @@ export default function RightComponent() {
                     />
                     <Bar
                       dataKey="lessThan1Yr"
-                      maxBarSize={35}
+                      barSize={32}
                       stackId="a"
                       fill="#2D7F6B"
+                      radius={[0,0,4,4]}
                       onClick={(data, ind) => setActiveIndex(ind)}
                     />
                     <Bar
-                      maxBarSize={35}
+                      barSize={32}
                       dataKey="oneToTwoYrs"
                       stackId="a"
                       fill="#FBAD42"
@@ -277,7 +266,7 @@ export default function RightComponent() {
                     />
                     <Bar
                       dataKey="moreThan2Yrs"
-                      maxBarSize={35}
+                      barSize={32}
                       radius={[4,4,0,0]}
                       stackId="a"
                       fill="#EC6140"
@@ -285,12 +274,6 @@ export default function RightComponent() {
                     />
                   </BarChart>
                </ResponsiveContainer>
-       
-               {/* <HighlightBar>
-                 {forecastData.map((_, index) => (
-                   <BarIndicator key={index} $active={activeIndex === index} />
-                 ))}
-               </HighlightBar> */}
              </ForecastWrapper>        
     </Container>
   );
