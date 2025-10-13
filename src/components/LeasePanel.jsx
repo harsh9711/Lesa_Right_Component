@@ -121,52 +121,23 @@ const SectionTitle = styled.div`
   flex: 1;
 `;
 const PreviewShell = styled.div`
-  margin: 0 16px 16px 0;
+margin: 0 16px 16px 0;
   padding: 14px;
   border: 2px solid #f1d0e3;
-  border-left: none;
+  border-left: 2px solid #f1d0e3;
   border-radius: 0px 20px 20px 20px;
-  border-top-right-radius: ${(p) => (p.$noTopRight ? "0px" : "20px")};
-    border-top-left-radius: ${(p) => (p.$noTopRight ? "0px" : "3px")};
-
+  border-top-left-radius: ${(p) => (p.$isFirstActive ? "0px" : "20px")};
   border-bottom-left-radius: 20px;
-  border-bottom-right-radius: ${(p) => (p.$isLastOpen ? "0px" : "20px")};
   background: #fff;
   display: grid;
   grid-template-columns: 3fr 104px;
   gap: 12px;
   position: relative;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -2px;
-    width: 2px;
-    height: calc(100% - 20px); // Reduced to make room for curve
-    background: #f1d0e3;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    border-top-right-radius: 24px;
-    border-bottom-right-radius: 24px;
-    left: -2px;
-    top: ${(p) => p.$gapTop || "0px"};
-    height: calc(${(p) => p.$gapHeight || "0px"} - 2px);
-    width: 2px; 
-    background: #fff;
-    border-top-right-radius: ${(p) => (p.$isLastOpen ? "25px" : "24px")};
-    border-bottom-right-radius: ${(p) => (p.$isLastOpen ? "25px" : "24px")};
-    transition:
-      top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* SVG curve element */
+  
   .curve {
     position: absolute;
 
@@ -177,17 +148,7 @@ const PreviewShell = styled.div`
     pointer-events: none;
     z-index: 2;
     
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 24px;
-      height: 24px;
-      background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0C0 13.2548 10.7452 24 24 24' stroke='%23f1d0e3' stroke-width='2'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: bottom left;
-    }
+ 
   }
 `;
 
@@ -315,46 +276,75 @@ const Thumb = styled.div`
 `;
 
 const SectionCard = styled.button`
+ ${(p) => p.$active && p.$wide && p.$isFirst ? `
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -6px;
+      width: 24px;
+      height: 2px;
+      background: #ffd1e8;
+      z-index: 3;
+    }
+    
+    border-top: 2px solid #ffd1e8;
+    margin-top: 0;
+  ` : ''}
+  
   padding: ${(p) => (p.$wide ? "0px" : "16px")};
-  margin: ${(p) => (p.$wide ? "2px 20px" : "8px 8px")};
-   background: #fff;
+  margin: ${(p) => (p.$wide ? "0px 0 2px 16px" : "8px 8px")};
+  position: relative;
+  background: #fff;
+  
   border: ${(p) =>
     p.$active && p.$wide
       ? "2px solid #ffd1e8"
-      : p.$wide
-        ? "2px solid #f1d0e3"
-        : p.$active
-          ? "2px solid #ff4da6"
-          : "2px solid #f1d0e3"};
-
-  ${(p) =>
-    p.$active && p.$wide
-      ? "border-right: none;"
       : "2px solid #f1d0e3"};
 
+  z-index: ${(p) => (p.$active && p.$wide ? "2" : "1")};
+  right: ${(p) => (p.$active && p.$wide ? "-2px" : "0")}; // Increased from -4px to -6px
+  
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
   width: ${(p) =>
-    p.$wide ? (p.$active ? "calc(100% - 20px)" : "90%") : "95%"};
-  transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
+    p.$wide
+      ? p.$active
+        ? "calc(100% - 16px)" // Adjusted width for better connection
+        : "calc(95% - 8px)"
+      : "95%"};
 
-    border-radius: 20px;
-     border-top-right-radius: ${(p) => (p.$active ? "24px" : "12px")};
-  border-bottom-right-radius: ${(p) => (p.$active ? "24px" : "12px")};
-       cursor: pointer;
-  box-shadow: ${(p) =>
-    p.$active
-      ? "0 6px 14px rgba(255,77,166,0.12)"
-      : "0 2px 6px rgba(0,0,0,0.04)"};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-right: ${(p) =>
+    p.$active && p.$wide
+      ? "2px solid #ffffff"
+      : "2px solid #f1d0e3"};
+  
+  border-radius: 0px;
+  border-top-right-radius: ${(p) => (p.$active ? "0" : "12px")}; // Changed to 0 for active state
+  border-bottom-right-radius: ${(p) => (p.$active ? "0" : "12px")}; // Changed to 0 for active state
+  cursor: pointer;
+  
+// ${(p) => p.$active && p.$wide && `
+//   &::before {
+//     content: '';
+//     position: absolute;
+//     top: -12px;
+//     left: 418px;
+//     width: 10px;
+//     height: 10px;
+//     border-bottom: 2px solid #f1d0e3;
+//     border-right: 2px solid #f1d0e3;
+//     border-bottom-right-radius: 24px;
+//     background: transparent;
+//     z-index: 3;
+//   }
+// `}
+  opacity: 1;
 
-   opacity: 1;
-
-  &:hover {
-    opacity: 0.8;
-    transform: translateY(-2px);
-    box-shadow: ${(p) => (p.$wide ? "none" : "0 4px 12px rgba(0,0,0,0.08)")};
-  }
+ 
 
   &:active {
     transform: translateY(0);
@@ -679,7 +669,7 @@ const InsightsContent = () => (
 );
 
 const SectionCardComponent = React.forwardRef((props, ref) => {
-  const { section, activeKey, isActive, isOpen, isWide, onToggle, style = {} } = props;
+  const { section, activeKey, isActive, isOpen, isWide, onToggle, style = {}, isFirst } = props;
   const { k, label, icon } = section;
 
   const renderContent = () => {
@@ -705,6 +695,8 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
       aria-expanded={isOpen}
       $active={isOpen}
       $wide={isWide}
+      $isFirst={isFirst}
+
       data-section={k}
       style={style}
       ref={ref}
@@ -712,7 +704,7 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
       <div style={{ width: "100%" }}>
         {isWide ? (
           <>
-          
+
             <SectionHeaderBar>
               <SectionHeader>
                 <SectionTitle>
@@ -923,6 +915,8 @@ export default function App({ onClose = () => { } }) {
                   isOpen={openKeys[section.k]}
                   isWide={wide}
                   onToggle={toggle}
+                  isFirst={idx === 0}
+
                   style={{
                     borderTopLeftRadius: idx === 0 ? "12px" : "12px",
                     borderBottomLeftRadius: idx === sortedSections.length - 1 ? "12px" : "12px",
@@ -940,7 +934,9 @@ export default function App({ onClose = () => { } }) {
               $wide
               $gapTop={`${gapStyle.top}px`}
               $gapHeight={`${gapStyle.height}px`}
-              $isLastOpen={activeKey === SECTIONS[SECTIONS.length - 1].k} >
+              $isLastOpen={activeKey === SECTIONS[SECTIONS.length - 1].k}
+              $isFirstActive={activeKey === SECTIONS[0].k}
+ >
               <div className="curve" />
 
               <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={1} />
