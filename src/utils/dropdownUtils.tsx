@@ -1,4 +1,6 @@
-export const viewSizeCalculator = (value: number, isPixel: boolean = false): string => {
+import def from "ajv/dist/vocabularies/applicator/additionalItems";
+
+const viewSizeCalculator = (value: number, isPixel: boolean = false): string => {
     const isNarrow = window.innerWidth / window.innerHeight < 2.5;
     let calculatedValue: number;
 
@@ -31,3 +33,5 @@ export const viewHeightCalculator = (value: number, isPixel: boolean = false): s
 
     return `${calculatedValue.toFixed(2)}vh`;
 };
+
+export default {viewSizeCalculator, viewHeightCalculator};
