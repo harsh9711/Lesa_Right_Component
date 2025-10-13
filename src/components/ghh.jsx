@@ -123,14 +123,10 @@ const SectionTitle = styled.div`
 const PreviewShell = styled.div`
   margin: 0 16px 16px 0;
   padding: 14px;
-  border: 2px solid #f1d0e3;
+  border: 4px solid #f1d0e3;
   border-left: none;
   border-radius: 0px 20px 20px 20px;
-  border-top-right-radius: ${(p) => (p.$noTopRight ? "0px" : "20px")};
-    border-top-left-radius: ${(p) => (p.$noTopRight ? "0px" : "3px")};
-
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: ${(p) => (p.$isLastOpen ? "0px" : "20px")};
+  border-bottom-left-radius: 12px;
   background: #fff;
   display: grid;
   grid-template-columns: 3fr 104px;
@@ -138,56 +134,54 @@ const PreviewShell = styled.div`
   position: relative;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* vertical pink connector line */
   &::before {
     content: "";
     position: absolute;
     top: 0;
-    left: -2px;
-    width: 2px;
-    height: calc(100% - 20px); // Reduced to make room for curve
+    left: -1px;
+    width: 4px;
+    height: 99.5%;
     background: #f1d0e3;
+    z-index: 1;
   }
 
+  /* white masking gap (removes section between panels) */
   &::after {
     content: "";
     position: absolute;
-    border-top-right-radius: 24px;
-    border-bottom-right-radius: 24px;
     left: -2px;
-    top: ${(p) => p.$gapTop || "0px"};
-    height: calc(${(p) => p.$gapHeight || "0px"} - 2px);
-    width: 2px; 
+    /* ⚡ offset top slightly to remove extra pink line above the gap */
+    top: calc(${(p) => p.$gapTop || "0px"} - 2px);
+    height: calc(${(p) => p.$gapHeight || "0px"} + 2px);
+    width: 6px;
     background: #fff;
     border-top-right-radius: ${(p) => (p.$isLastOpen ? "25px" : "24px")};
     border-bottom-right-radius: ${(p) => (p.$isLastOpen ? "25px" : "24px")};
+    z-index: 2;
     transition:
       top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
       border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* SVG curve element */
+  /* curved bottom-left connector */
   .curve {
     position: absolute;
-
     left: -1px;
-    bottom: ${(p) => (p.$isLastOpen ? "-1px" : "-2px")};
-    width: 24px;
-    height: 24px;
+    bottom: -4px;
+    width: 32px;
+    height: 32px;
     pointer-events: none;
-    z-index: 2;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 24px;
-      height: 24px;
-      background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0C0 13.2548 10.7452 24 24 24' stroke='%23f1d0e3' stroke-width='2'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: bottom left;
-    }
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: contain;
+    z-index: 3;
+    background-image: url("data:image/svg+xml;utf8,\
+      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'>\
+        <path d='M0 22 C0 37 22 44 44 44' fill='none' stroke='%23f1d0e3' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/>\
+      </svg>"
+    );
   }
 `;
 
@@ -320,17 +314,17 @@ const SectionCard = styled.button`
    background: #fff;
   border: ${(p) =>
     p.$active && p.$wide
-      ? "2px solid #ffd1e8"
+      ? "4px solid #ffd1e8"
       : p.$wide
-        ? "2px solid #f1d0e3"
+        ? "4px solid #f1d0e3"
         : p.$active
-          ? "2px solid #ff4da6"
-          : "2px solid #f1d0e3"};
+          ? "4px solid #ff4da6"
+          : "4px solid #f1d0e3"};
 
   ${(p) =>
     p.$active && p.$wide
       ? "border-right: none;"
-      : "2px solid #f1d0e3"};
+      : "4px solid #f1d0e3"};
 
   display: flex;
   align-items: flex-start;
@@ -712,7 +706,6 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
       <div style={{ width: "100%" }}>
         {isWide ? (
           <>
-          
             <SectionHeaderBar>
               <SectionHeader>
                 <SectionTitle>
@@ -935,14 +928,13 @@ export default function App({ onClose = () => { } }) {
 
 
             </div>
-            <PreviewShell
+            <PreviewShell       
               data-preview-shell
               $wide
               $gapTop={`${gapStyle.top}px`}
               $gapHeight={`${gapStyle.height}px`}
               $isLastOpen={activeKey === SECTIONS[SECTIONS.length - 1].k} >
-              <div className="curve" />
-
+              <div className="curve"></div>
               <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={1} />
               <PDFThumbnailViewer pdfUrl="/dummy.pdf" onPageClick={() => { }} currentPage={1} />
             </PreviewShell>
