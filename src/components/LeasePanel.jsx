@@ -303,7 +303,7 @@ const SectionCard = styled.button`
       : "2px solid #f1d0e3"};
 
   z-index: ${(p) => (p.$active && p.$wide ? "2" : "1")};
-  right: ${(p) => (p.$active && p.$wide ? "-2px" : "0")}; // Increased from -4px to -6px
+  right: ${(p) => (p.$active && p.$wide ? "-3px" : "0")}; // Increased from -4px to -6px
   
   display: flex;
   align-items: flex-start;
@@ -319,14 +319,13 @@ const SectionCard = styled.button`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-right: ${(p) =>
     p.$active && p.$wide
-      ? "2px solid #ffffff"
+      ? "4px solid #ffffff"
       : "2px solid #f1d0e3"};
   
-  border-radius: 0px;
-  border-top-right-radius: ${(p) => (p.$active ? "0" : "12px")}; // Changed to 0 for active state
-  border-bottom-right-radius: ${(p) => (p.$active ? "0" : "12px")}; // Changed to 0 for active state
-  cursor: pointer;
-  
+  border-radius: 20px 20px 20px 20px;
+  border-top-right-radius: ${(p) => (p.$active && !p.wide ? "0px" : "20px")};
+  border-bottom-right-radius: ${(p) => (p.$active && !p.wide ? "0px" : "20px")}; 
+  cursor: pointer; 
 // ${(p) => p.$active && p.$wide && `
 //   &::before {
 //     content: '';
