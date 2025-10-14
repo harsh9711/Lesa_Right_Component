@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import * as pdfjsLib from "pdfjs-dist";
+import { viewSizeCalculator,viewHeightCalculator } from "../utils/dropdown";
 if (typeof window !== "undefined") {
   pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs";
 }
@@ -12,38 +13,48 @@ export { pdfjsLib };
 
 
 const PanelWrap = styled.div`
+padding:${() => viewSizeCalculator(10, true)};
   position: absolute;
-  top: 24px;
-  right: 24px;
-  width: ${(p) => (p.$wide ? "900px" : "420px")};
-  max-height: calc(100vh - 48px);
+  top: ${() => viewHeightCalculator(24, true)};
+  right: ${() => viewSizeCalculator(24, true)};
+  width: ${(p) =>
+    p.$wide
+      ? viewSizeCalculator(900, true)
+      : viewSizeCalculator(420, true)};
+  max-width: ${(p) => (p.$wide ? "970px" : "408px")};
+  max-height: calc(100vh - ${() => viewHeightCalculator(48, true)});
   overflow: auto;
   background:
     radial-gradient(1200px 400px at 100% -50%, rgba(255, 77, 166, 0.06), transparent 60%),
     radial-gradient(1000px 600px at -10% 10%, rgba(255, 202, 236, 0.18), transparent 60%),
     #ffffffee;
   border: 2px solid #ff4da6;
-  border-radius: 16px;
+  border-radius: ${() => viewSizeCalculator(12, true)};
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
-  transition:
-    width 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
-    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+   transition:
+    width 2s cubic-bezier(0.22, 1, 0.36, 1),
+    max-width 2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s ease;
 `;
 
 const Header = styled.div`
-  padding: 18px 20px 10px 20px;
+  padding: ${() => viewHeightCalculator(6, true)}
+    ${() => viewSizeCalculator(4, true)}
+    ${() => viewHeightCalculator(4, true)}
+    ${() => viewSizeCalculator(4, true)};
+    flex-direction:row;
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   position: relative;
-  background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
+  // background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
 `;
 
 const Title = styled.div`
   font-weight: 300;
-  font-size: 22px;
+  font-size: clamp(16px, ${() => viewSizeCalculator(22, true)}, 22px);
   color: #2b2b2b;
 `;
 
@@ -52,22 +63,43 @@ const TitleStrong = styled.span`
 `;
 
 const SubTitle = styled.div`
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: ${() => viewHeightCalculator(4, true)};
+  font-size: clamp(10px, ${() => viewSizeCalculator(12, true)}, 12px);
   color: black;
+  position: relative;
 `;
 
 const SubTitleSecondary = styled(SubTitle)`
-  margin-top: 6px;
+  margin-top: ${() => viewHeightCalculator(6, true)};
+  margin-bottom: ${() => viewHeightCalculator(6, true)};
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+
+  
+  ${(p) => p.$wide ? `
+    left:180%;
+    
+    transform: translateX(-155%);
+    justify-content: flex-end;
+    margin-bottom: ${viewSizeCalculator(20)};
+  ` : `
+    left: 145%;
+    transform: translateX(-155%);
+    justify-content: center;
+  `}
 `;
 
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: clamp(6px, ${() => viewSizeCalculator(10, true)}, 10px);
   position: absolute;
-  top: 12px;
-  right: 20px;
+  top: ${() => viewHeightCalculator(4, true)};
+  right: ${() => viewSizeCalculator(6, true)};
 `;
 
 const HeaderRow = styled.div`
@@ -75,12 +107,12 @@ const HeaderRow = styled.div`
   flex-direction: row;
   width: 100%;
   justify-content: space-between;
-  gap: 10px;
+  gap: clamp(6px, ${() => viewSizeCalculator(10, true)}, 10px);
 `;
 
 const IconBtn = styled.button`
-  width: 32px;
-  height: 32px;
+  width: clamp(24px, ${() => viewSizeCalculator(32, true)}, 32px);
+  height: clamp(24px, ${() => viewSizeCalculator(32, true)}, 32px);
   background: #fff;
   color: #ff4da6;
   display: inline-flex;
@@ -90,7 +122,7 @@ const IconBtn = styled.button`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
   outline: none;
-  border: none; 
+  border: none;
 
   &:hover {
     transform: scale(1.05);
@@ -102,7 +134,6 @@ const IconBtn = styled.button`
     opacity: 0.9;
   }
 `;
-
 
 const SectionHeader = styled.div`
   display: flex;
@@ -116,39 +147,45 @@ const SectionTitle = styled.div`
   color: #2b2b2b;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: ${(p) => (p.$small ? '14px' : '16px')};
+  gap: clamp(6px, ${() => viewSizeCalculator(10, true)}, 10px);
+  font-size: ${(p) =>
+    p.$small
+      ? `clamp(12px, ${viewSizeCalculator(14, true)}, 14px)`
+      : `clamp(14px, ${viewSizeCalculator(16, true)}, 16px)`};
   flex: 1;
 `;
 const PreviewShell = styled.div`
-margin: 0 16px 16px 0;
-  padding: 14px;
+  margin: 0 
+    clamp(10px, ${viewSizeCalculator(16, true)}, 16px) 
+    clamp(10px, ${viewHeightCalculator(16, true)}, 16px) 
+    0;
+  padding: clamp(10px, ${viewSizeCalculator(14, true)}, 14px);
   border: 2px solid #f1d0e3;
   border-left: 2px solid #f1d0e3;
-  border-radius: 0px 20px 20px 20px;
-  border-top-left-radius: ${(p) => (p.$isFirstActive ? "0px" : "20px")};
-  border-bottom-left-radius: 20px;
+  border-radius: 0
+    clamp(14px, ${viewSizeCalculator(20, true)}, 20px)
+    clamp(14px, ${viewSizeCalculator(20, true)}, 20px)
+    clamp(14px, ${viewSizeCalculator(20, true)}, 20px);
+  border-top-left-radius: ${(p) =>
+    p.$isFirstActive
+      ? "0"
+      : `clamp(14px, ${viewSizeCalculator(20, true)}, 20px)`};
+  border-bottom-left-radius: clamp(14px, ${viewSizeCalculator(20, true)}, 20px);
   background: #fff;
   display: grid;
-  grid-template-columns: 3fr 104px;
-  gap: 12px;
+  grid-template-columns: 3fr clamp(72px, ${viewSizeCalculator(104, true)}, 104px);
+  gap: clamp(8px, ${viewSizeCalculator(12, true)}, 12px);
   position: relative;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  
 
-  
   .curve {
     position: absolute;
-
     left: -1px;
     bottom: ${(p) => (p.$isLastOpen ? "-1px" : "-2px")};
-    width: 24px;
-    height: 24px;
+    width: clamp(16px, ${viewSizeCalculator(24, true)}, 24px);
+    height: clamp(16px, ${viewHeightCalculator(24, true)}, 24px);
     pointer-events: none;
     z-index: 2;
-    
- 
   }
 `;
 
@@ -160,51 +197,62 @@ const BadgeRow = styled.div`
 `;
 
 const Badge = styled.span`
-  width: ${(p) => (p.$size === 'sm' ? '40px' : '28px')};
-  height: ${(p) => (p.$size === 'sm' ? '40px' : '28px')};
+  width: ${(p) =>
+    p.$size === "sm"
+      ? `clamp(32px, ${viewSizeCalculator(40, true)}, 40px)`
+      : `clamp(24px, ${viewSizeCalculator(28, true)}, 28px)`};
+  height: ${(p) =>
+    p.$size === "sm"
+      ? `clamp(32px, ${viewSizeCalculator(40, true)}, 40px)`
+      : `clamp(24px, ${viewSizeCalculator(28, true)}, 28px)`};
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: #fff;
-  font-size: ${(p) => (p.$size === 'sm' ? '12px' : '14px')};
+  font-size: ${(p) =>
+    p.$size === "sm"
+      ? `clamp(10px, ${viewSizeCalculator(12, true)}, 12px)`
+      : `clamp(12px, ${viewSizeCalculator(14, true)}, 14px)`};
 `;
 
 const DetailGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 16px;
-  margin-top: 12px;
+  gap: clamp(6px, ${viewSizeCalculator(10, true)}, 10px)
+    clamp(8px, ${viewSizeCalculator(16, true)}, 16px);
+  margin-top: clamp(8px, ${viewHeightCalculator(12, true)}, 12px);
 `;
 
 const DetailItem = styled.div`
   border-left: 3px solid #e9e9ef;
-  padding-left: 10px;
-  font-size: 13px;
+  padding-left: clamp(6px, ${viewSizeCalculator(10, true)}, 10px);
+  font-size: clamp(11px, ${viewSizeCalculator(13, true)}, 13px);
   color: #3b3b3b;
 `;
 
 const Hint = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
+  gap: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
+  margin-top: clamp(6px, ${viewHeightCalculator(10, true)}, 10px);
   color: #6a6a6a;
-  font-size: 12px;
+  font-size: clamp(10px, ${viewSizeCalculator(12, true)}, 12px);
 `;
 
 const CanvasWrap = styled.div`
   width: 100%;
-  height: 450px;
-  border-radius: 8px;
+  height: clamp(250px, ${viewHeightCalculator(450, true)}, 450px);
+  border-radius: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 `;
+
 const PageCanvas = styled.canvas`
   width: 100%;
-  height:auto;
+  height: auto;
   transition: opacity 220ms ease, transform 220ms ease;
   will-change: opacity, transform;
 `;
@@ -217,7 +265,7 @@ const shimmer = keyframes`
 const SkeletonBox = styled.div`
   width: 100%;
   height: 50%;
-  border-radius: 8px;
+  border-radius: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
   background: linear-gradient(90deg, #f0f0f3 0%, #e6e6ee 50%, #f0f0f3 100%);
   background-size: 100% 100%;
   animation: ${shimmer} 1.2s ease-in-out infinite;
@@ -226,11 +274,11 @@ const SkeletonBox = styled.div`
 const ThumbnailGrid = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 68px;
-  width: 104px;
+  gap: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
+  margin-top: clamp(40px, ${viewHeightCalculator(68, true)}, 68px);
+  width: clamp(72px, ${viewSizeCalculator(104, true)}, 104px);
   align-items: center;
-  max-height: 300px;
+  max-height: clamp(180px, ${viewHeightCalculator(300, true)}, 300px);
   overflow-y: auto;
 
   &::-webkit-scrollbar {
@@ -248,11 +296,11 @@ const ThumbnailGrid = styled.div`
 `;
 
 const Thumb = styled.div`
-  width: 96px;
-  height: 128px;
-  border-radius: 6px;
+  width: clamp(72px, ${viewSizeCalculator(96, true)}, 96px);
+  height: clamp(100px, ${viewHeightCalculator(128, true)}, 128px);
+  border-radius: clamp(4px, ${viewSizeCalculator(6, true)}, 6px);
   background: #ffffff;
-  border: 2px solid ${(p) => (p.$active ? '#ff4da6' : '#f1d0e3')};
+  border: 2px solid ${(p) => (p.$active ? "#ff4da6" : "#f1d0e3")};
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
@@ -274,37 +322,36 @@ const Thumb = styled.div`
     object-fit: contain;
   }
 `;
-
 const SectionCard = styled.button`
- ${(p) => p.$active && p.$wide && p.$isFirst ? `
+  ${(p) =>
+    p.$active && p.$wide && p.$isFirst
+      ? `
     &::before {
       content: '';
       position: absolute;
-      top: -2px;
+      top: -1px;
       right: -6px;
       width: 24px;
-      height: 2px;
+      height: 1px;
       background: #ffd1e8;
       z-index: 3;
     }
-    
     border-top: 2px solid #ffd1e8;
     margin-top: 0;
-  ` : ''}
-  
-  padding: ${(p) => (p.$wide ? "0px" : "16px")};
-  margin: ${(p) => (p.$wide ? "0px 0 2px 16px" : "8px 8px")};
+  `
+      : ''}
+
+  padding: ${(p) => (p.$wide ? '0px' : '16px')};
+  margin: ${(p) => (p.$wide ? '0px 0 2px 16px' : '8px 8px')};
   position: relative;
   background: #fff;
-  
-  border: ${(p) =>
-    p.$active && p.$wide
-      ? "2px solid #ffd1e8"
-      : "2px solid #f1d0e3"};
 
-  z-index: ${(p) => (p.$active && p.$wide ? "2" : "1")};
-  right: ${(p) => (p.$active && p.$wide ? "-3px" : "0")}; // Increased from -4px to -6px
-  
+  border: ${(p) =>
+    p.$active && p.$wide ? '2px solid #ffd1e8' : '2px solid #f1d0e3'};
+
+  z-index: ${(p) => (p.$active && p.$wide ? '2' : '1')};
+  right: ${(p) => (p.$active && p.$wide ? '-3px' : '0')};
+
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -312,38 +359,27 @@ const SectionCard = styled.button`
   width: ${(p) =>
     p.$wide
       ? p.$active
-        ? "calc(100% - 16px)" // Adjusted width for better connection
-        : "calc(95% - 8px)"
-      : "95%"};
+        ? 'calc(100% - 16px)'
+        : 'calc(95% - 8px)'
+      : '95%'};
 
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-right: ${(p) =>
-    p.$active && p.$wide
-      ? "4px solid #ffffff"
-      : "2px solid #f1d0e3"};
-  
-  border-radius: 20px 20px 20px 20px;
-  border-top-right-radius: ${(p) => (p.$active && !p.wide ? "0px" : "20px")};
-  border-bottom-right-radius: ${(p) => (p.$active && !p.wide ? "0px" : "20px")}; 
-  cursor: pointer; 
-// ${(p) => p.$active && p.$wide && `
-//   &::before {
-//     content: '';
-//     position: absolute;
-//     top: -12px;
-//     left: 418px;
-//     width: 10px;
-//     height: 10px;
-//     border-bottom: 2px solid #f1d0e3;
-//     border-right: 2px solid #f1d0e3;
-//     border-bottom-right-radius: 24px;
-//     background: transparent;
-//     z-index: 3;
-//   }
-// `}
-  opacity: 1;
 
- 
+  /* Border-right only in wide mode */
+  border-right: ${(p) =>
+    p.$wide && p.$active ? '4px solid #ffffff' : '2px solid #f1d0e3'};
+
+  border-radius: 20px;
+
+  /* ✅ Keep right corners curved in non-wide active mode */
+  border-top-right-radius: ${(p) =>
+    !p.$wide && p.$active ? '20px' : p.$wide && p.$active ? '0px' : '20px'};
+
+  border-bottom-right-radius: ${(p) =>
+    !p.$wide && p.$active ? '20px' : p.$wide && p.$active ? '0px' : '20px'};
+
+  cursor: pointer;
+  opacity: 1;
 
   &:active {
     transform: translateY(0);
@@ -354,18 +390,28 @@ const SectionCard = styled.button`
 
 
 
+
+
+
 const AccordionContent = styled.div`
-  max-height: ${(p) => (p.$open ? "500px" : "0")};
+  max-height: ${(p) =>
+    p.$open
+      ? `clamp(300px, ${viewHeightCalculator(500, true)}, 500px)`
+      : "0"};
   opacity: ${(p) => (p.$open ? "1" : "0")};
   overflow: hidden;
   transition:
-     max-height 1s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+    max-height 1s cubic-bezier(0.68, -0.55, 0.27, 1.55),
     opacity 0.5s ease,
     transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  margin-top: ${(p) => (p.$open ? "0px" : "0")};
+  margin-top: ${(p) => (p.$open ? "0" : "0")};
   position: ${(p) => (p.$wide ? "relative" : "static")};
-  transform: ${(p) => (p.$open ? "translateY(0)" : "translateY(-10px) scale(0.98)")};
+  transform: ${(p) =>
+    p.$open
+      ? "translateY(0)"
+      : `translateY(-${viewHeightCalculator(10, true)}) scale(0.98)`};
 `;
+
 const AccordionInner = styled.div`
   display: grid;
   grid-template-columns: ${(p) => (p.$wide ? "1.5fr 1.5fr" : "1fr")};
@@ -375,28 +421,53 @@ const AccordionInner = styled.div`
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
-
 const DetailsShell = styled.div`
-  margin: 0 0 16px 16px;
-  padding: 0px;
-  border-radius: 20px 0px 0px 20px;
-  border-top-left-radius: ${(p) => (p.$noTopLeft ? '0px' : '20px')};
+  margin: 0 0
+    clamp(10px, ${viewSizeCalculator(16, true)}, 16px)
+    clamp(10px, ${viewSizeCalculator(16, true)}, 16px);
+  padding: 0;
+  border-radius: clamp(14px, ${viewSizeCalculator(20, true)}, 20px) 0 0
+    clamp(14px, ${viewSizeCalculator(20, true)}, 20px);
+  border-top-left-radius: ${(p) =>
+    p.$noTopLeft
+      ? "0"
+      : `clamp(14px, ${viewSizeCalculator(20, true)}, 20px)`};
   background: #ffffff;
-  height: ${(p) => (p.$wide ? "100px" : "auto")};
-  min-height: ${(p) => (p.$wide ? "100px" : "auto")};
-  max-height: ${(p) => (p.$wide ? "100px" : "none")};
+  height: ${(p) =>
+    p.$wide
+      ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)`
+      : "auto"};
+  min-height: ${(p) =>
+    p.$wide
+      ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)`
+      : "auto"};
+  max-height: ${(p) =>
+    p.$wide
+      ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)`
+      : "none"};
   overflow-y: ${(p) => (p.$wide ? "auto" : "visible")};
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: ${(p) => (p.$wide ? "translateX(0)" : "translateX(0)")};
-  opacity: ${(p) => (p.$wide ? "1" : "1")};
+  transform: translateX(0);
+  opacity: 1;
 `;
 
 const SectionHeaderBar = styled.div`
-  margin: ${(p) => (p.$wide ? "0px 0px 0 16px" : "14px 16px 0 16p")};
-  padding: ${(p) => (p.$wide ? "8px 0px" : "12px 14px")};
+  margin: ${(p) =>
+    p.$wide
+      ? `0 0 0 clamp(10px, ${viewSizeCalculator(16, true)}, 16px)`
+      : `clamp(10px, ${viewHeightCalculator(14, true)}, 14px) 
+         clamp(10px, ${viewSizeCalculator(16, true)}, 16px) 
+         0 
+         clamp(10px, ${viewSizeCalculator(16, true)}, 16px)`};
+  padding: ${(p) =>
+    p.$wide
+      ? `clamp(6px, ${viewHeightCalculator(8, true)}, 8px) 0`
+      : `clamp(8px, ${viewHeightCalculator(12, true)}, 12px) 
+         clamp(10px, ${viewSizeCalculator(14, true)}, 14px)`};
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 `;
+
 
 const SECTIONS = [
   { k: "ground", label: "Ground Lease", icon: '/assets/flag.png' },
@@ -767,6 +838,7 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
 export default function App({ onClose = () => { } }) {
   const [wide, setWide] = React.useState(false);
   const activeSectionRef = useRef(null);
+  const [selectedPage, setSelectedPage] = React.useState(1); 
 
   const [openKeys, setOpenKeys] = React.useState({
     ground: true,
@@ -866,6 +938,7 @@ export default function App({ onClose = () => { } }) {
           <SubTitleSecondary>
             Tower Type: Macro Tower (150 ft)
           </SubTitleSecondary>
+          
         </div>
         <HeaderRight>
           {wide ? (
@@ -877,8 +950,6 @@ export default function App({ onClose = () => { } }) {
             </IconBtn>
           ) : (
             <>
-
-
               <IconBtn
                 aria-label="expand"
                 onClick={() => setWide((w) => !w)}
@@ -935,11 +1006,16 @@ export default function App({ onClose = () => { } }) {
               $gapHeight={`${gapStyle.height}px`}
               $isLastOpen={activeKey === SECTIONS[SECTIONS.length - 1].k}
               $isFirstActive={activeKey === SECTIONS[0].k}
- >
+            >
               <div className="curve" />
+              <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={selectedPage} />
 
-              <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={1} />
-              <PDFThumbnailViewer pdfUrl="/dummy.pdf" onPageClick={() => { }} currentPage={1} />
+              {/* ✅ wire up thumbnail clicks */}
+              <PDFThumbnailViewer
+                pdfUrl="/dummy.pdf"
+                onPageClick={setSelectedPage}
+                currentPage={selectedPage}
+              />
             </PreviewShell>
 
 

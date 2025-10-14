@@ -1,8 +1,8 @@
 import def from "ajv/dist/vocabularies/applicator/additionalItems";
 
-export const viewSizeCalculator = (value: number, isPixel: boolean = false): string => {
+export const viewSizeCalculator = (value, isPixel = false) => {
     const isNarrow = window.innerWidth / window.innerHeight < 2.5;
-    let calculatedValue: number;
+    let calculatedValue;
 
     if (isNarrow) {
         calculatedValue = isPixel
@@ -17,9 +17,9 @@ export const viewSizeCalculator = (value: number, isPixel: boolean = false): str
     return `${calculatedValue.toFixed(2)}vw`;
 };
 
- export const viewHeightCalculator = (value: number, isPixel: boolean = false): string => {
+export const viewHeightCalculator = (value, isPixel = false) => {
     const isNarrow = window.innerWidth / window.innerHeight < 2.5;
-    let calculatedValue: number;
+    let calculatedValue;
 
     if (isNarrow) {
         calculatedValue = isPixel
@@ -33,4 +33,3 @@ export const viewSizeCalculator = (value: number, isPixel: boolean = false): str
 
     return `${calculatedValue.toFixed(2)}vh`;
 };
-
