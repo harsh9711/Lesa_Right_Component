@@ -112,56 +112,92 @@ export default function RightComponent() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [realCorrdinate,setCorrdinate]=useState({x:0,y:0})  
   const chartRef=useRef()
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [tooltipDir, setTooltipDir] = useState("right"); 
+  const tooltipRef = useRef(null);
 
-  const renderCustomLegend = ({ payload }) => {
-    console.log(payload)
-    return (
-    <LegendContainer>
-      <p
-        style={{
-          width:"100%",
-          textAlign:"center",
-          fontWeight:'500',
-          fontSize:`${viewSizeCalculator(13,true)}`,
-          verticalAlign:'bottom',
-          fontFamily:'Poppins',
-          color: "rgba(51, 51, 51, 1)"
+  useEffect(() => {
+    if (!chartRef.current) return;
 
-        }}
-      >Leases expiring in</p>
-      <div 
-        style={{
-          width:"100%",
-          display:'flex',
-          justifyContent:'center',
-          gap:`${viewSizeCalculator(16,true)}`,
-          padding:`0 ${viewSizeCalculator(10,true)} 0 ${viewSizeCalculator(10,true)}`
-        }}
-      >
-          {payload.map((entry, index) => (
-          <LegendItem key={`item-${index}`}>
-            <LegendIcon style={{ backgroundColor: entry.color }} />
-            <LegendLabel>{entry.value}</LegendLabel>
-          </LegendItem>
-        ))}
-      </div>
+    const containerRect = chartRef.current.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current?.getBoundingClientRect();
+    const tooltipWidth = tooltipRect?.width && tooltipRect.width > 0 ? tooltipRect.width : 180; // ✅ fallback
+
+    const spaceRight = containerRect.width - mousePos.x;
+    const spaceLeft = mousePos.x;
+
+    if (spaceRight >= tooltipWidth + 16) {
+      setTooltipDir("right");
+    } else if (spaceLeft >= tooltipWidth + 16) {
+      setTooltipDir("left");
+    } else {
+      setTooltipDir(spaceRight > spaceLeft ? "right" : "left");
+    }
+  }, [mousePos]);
+
+
+  // const renderCustomLegend = ({ payload }) => {
+  //   console.log(payload)
+  //   return (
+  //   <LegendContainer>
+  //     <p
+  //       style={{
+  //         width:"100%",
+  //         textAlign:"center",
+  //         fontWeight:'500',
+  //         fontSize:`${viewSizeCalculator(13,true)}`,
+  //         verticalAlign:'bottom',
+  //         fontFamily:'Poppins',
+  //         color: "rgba(51, 51, 51, 1)"
+
+  //       }}
+  //     >Leases expiring in</p>
+  //     <div 
+  //       style={{
+  //         width:"100%",
+  //         display:'flex',
+  //         justifyContent:'center',
+  //         gap:`${viewSizeCalculator(16,true)}`,
+  //         padding:`0 ${viewSizeCalculator(10,true)} 0 ${viewSizeCalculator(10,true)}`
+  //       }}
+  //     >
+  //         {payload.map((entry, index) => (
+  //         <LegendItem key={`item-${index}`}>
+  //           <LegendIcon style={{ backgroundColor: entry.color }} />
+  //           <LegendLabel>{entry.value}</LegendLabel>
+  //         </LegendItem>
+  //       ))}
+  //     </div>
       
-    </LegendContainer>
-  )};
+  //   </LegendContainer>
+  // )};
 
-  //Custom Tooltip
-  const CustomTooltip = ({ active, payload,coordinate}) => {
-   
+  const CustomTooltip = ({ active, payload, mousePos, tooltipDir }) => {
     if (active && payload && payload.length) {
-    
       const item = payload[0].payload;
+
+      const horizontalOffset =
+        tooltipDir === "right" ? "16px" : "-100%";
+      const extraOffset =
+        tooltipDir === "right" ? "" : " translateX(-16px)";
+
       return (
-        <TooltipContainer 
+        <TooltipContainer
+          ref={tooltipRef}   // ✅ Attach here
           style={{
-            transition: "all 0.5s ease-in",
-            position:"absolute",
-            left:coordinate.x,
-            top:coordinate.y
+            position: "absolute",
+            left: mousePos.x,
+            top: mousePos.y,
+            width: "auto",            
+            maxWidth: "250px",      
+            transform: `translate(${horizontalOffset}, -25%)${extraOffset}`,
+            transition: "top 0.05s ease, left 0.05s ease",
+            pointerEvents: "none",
+            backgroundColor: "#fff",
+            borderRadius: `${viewSizeCalculator(8, true)}`,
+            padding: `${viewSizeCalculator(10, true)} ${viewSizeCalculator(14, true)}`,
+            boxShadow: "0px 2px 10px rgba(0,0,0,0.15)",
+            whiteSpace: "nowrap",       // ✅ Keeps it from breaking mid-word
           }}
         >
           <TooltipHeading>National</TooltipHeading>
@@ -171,14 +207,14 @@ export default function RightComponent() {
               <TooltipNumber>{item.value}</TooltipNumber>/900
             </TooltipValue>
           </TooltipRow>
-          <TooltipSubtext>
-            Leases expiring in {item.name}
-          </TooltipSubtext>
+          <TooltipSubtext>Leases expiring in {item.name}</TooltipSubtext>
         </TooltipContainer>
       );
     }
     return null;
   };
+
+
   
   return (
     <Container>
@@ -198,29 +234,43 @@ export default function RightComponent() {
   <DonutChartBox>
     <ResponsiveContainer width="100%" height="100%">
       <PieChart ref={chartRef}>
-        <Pie
-          data={donutData}
-          dataKey="value"
-          innerRadius="75%"
-          outerRadius="100%"
-          startAngle={90}
-          endAngle={-270}
-        >
-          {donutData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
-        </Pie>
+              <Pie
+                data={donutData}
+                dataKey="value"
+                innerRadius="75%"
+                outerRadius="100%"
+                startAngle={90}
+                endAngle={-270}
+                onMouseMove={(data, index, e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setMousePos({
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top,
+                  });
+                }}
+                onMouseLeave={() => {
+                  setMousePos({ x: 0, y: 0 });
+                }}
+                style={{ cursor: "pointer" }}   // 👈 ✋ This line
+              >
 
-        <Tooltip
-          wrapperStyle={{
-            backgroundColor: "#fff",
-            opacity: 1,
-            borderRadius: `${viewSizeCalculator(8, true)}`,
-            zIndex: 1000,
-            position: "relative",
-          }}
-          content={<CustomTooltip />}
-        />
+                {donutData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+
+
+              <Tooltip
+                wrapperStyle={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  boxShadow: "none",
+                  pointerEvents: "none",
+                }}
+                content={<CustomTooltip mousePos={mousePos} />}
+              />
+
+     
       </PieChart>
     </ResponsiveContainer>
 
