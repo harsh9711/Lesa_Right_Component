@@ -1,42 +1,62 @@
 "use client";
-
+import dummyPdf from "../dummy.pdf";
 import React, { useEffect, useRef, useState } from "react";
-import styled, { keyframes } from "styled-components";
 import * as pdfjsLib from "pdfjs-dist";
-import { viewSizeCalculator,viewHeightCalculator } from "../utils/dropdown";
-if (typeof window !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs";
+import "pdfjs-dist/build/pdf";
+import styled, { keyframes } from "styled-components";
+import { viewSizeCalculator, viewHeightCalculator } from "../utils/dropdown";
+import { PDFPageCanvas, PDFThumbnailViewer } from "./Pdf";
+
+if (typeof window !== "undefined" && pdfjsLib.GlobalWorkerOptions) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/build/pdf.worker.mjs",
+    import.meta.url
+  ).toString();
 }
+const Container = styled.div`
+  padding: 0px 14px;
+`;
 
-export { pdfjsLib };
+const Title = styled.div`
+  font-weight: 700;
+  color: #2b2b2b;
+  margin-bottom: 10px;
+`;
 
-
-
+const Paragraph = styled.p`
+  margin: 0px 0px;
+  color: #4a4a4a;
+  font-size: 13px;
+  line-height: 1.5;
+`;
 const PanelWrap = styled.div`
-padding:${() => viewSizeCalculator(10, true)};
+  padding: ${() => viewSizeCalculator(10, true)};
   position: absolute;
   top: ${() => viewHeightCalculator(24, true)};
   right: ${() => viewSizeCalculator(24, true)};
   width: ${(p) =>
-    p.$wide
-      ? viewSizeCalculator(900, true)
-      : viewSizeCalculator(420, true)};
+    p.$wide ? viewSizeCalculator(900, true) : viewSizeCalculator(420, true)};
   max-width: ${(p) => (p.$wide ? "970px" : "408px")};
   max-height: calc(100vh - ${() => viewHeightCalculator(48, true)});
   overflow: auto;
-  background:
-    radial-gradient(1200px 400px at 100% -50%, rgba(255, 77, 166, 0.06), transparent 60%),
-    radial-gradient(1000px 600px at -10% 10%, rgba(255, 202, 236, 0.18), transparent 60%),
+  background: radial-gradient(
+      1200px 400px at 100% -50%,
+      rgba(255, 77, 166, 0.06),
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 600px at -10% 10%,
+      rgba(255, 202, 236, 0.18),
+      transparent 60%
+    ),
     #ffffffee;
   border: 2px solid #ff4da6;
   border-radius: ${() => viewSizeCalculator(12, true)};
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
-   transition:
-    width 2s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: width 2s cubic-bezier(0.22, 1, 0.36, 1),
     max-width 2s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.5s ease;
+    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
 `;
 
 const Header = styled.div`
@@ -44,19 +64,13 @@ const Header = styled.div`
     ${() => viewSizeCalculator(4, true)}
     ${() => viewHeightCalculator(4, true)}
     ${() => viewSizeCalculator(4, true)};
-    flex-direction:row;
+  flex-direction: row;
   display: flex;
   align-items: start;
   justify-content: center;
   position: relative;
-  // background: linear-gradient(180deg, #ffffff 0%, #fff9fd 100%);
 `;
 
-const Title = styled.div`
-  font-weight: 300;
-  font-size: clamp(16px, ${() => viewSizeCalculator(22, true)}, 22px);
-  color: #2b2b2b;
-`;
 
 const TitleStrong = styled.span`
   font-weight: 600;
@@ -79,14 +93,15 @@ const SubTitleSecondary = styled(SubTitle)`
   text-align: center;
   width: 100%;
 
-  
-  ${(p) => p.$wide ? `
-    left:180%;
-    
+  ${(p) =>
+    p.$wide
+      ? `
+    left:135%;
     transform: translateX(-155%);
     justify-content: flex-end;
-    margin-bottom: ${viewSizeCalculator(20)};
-  ` : `
+    margin-bottom: ${viewSizeCalculator(20, true)};
+  `
+      : `
     left: 145%;
     transform: translateX(-155%);
     justify-content: center;
@@ -154,27 +169,26 @@ const SectionTitle = styled.div`
       : `clamp(14px, ${viewSizeCalculator(16, true)}, 16px)`};
   flex: 1;
 `;
+
 const PreviewShell = styled.div`
-  margin: 0 
-    clamp(10px, ${viewSizeCalculator(16, true)}, 16px) 
-    clamp(10px, ${viewHeightCalculator(16, true)}, 16px) 
-    0;
-  padding: clamp(10px, ${viewSizeCalculator(14, true)}, 14px);
+  padding: clamp(16px, ${() => viewSizeCalculator(20, true)}, 14px);
   border: 2px solid #f1d0e3;
   border-left: 2px solid #f1d0e3;
   border-radius: 0
-    clamp(14px, ${viewSizeCalculator(20, true)}, 20px)
-    clamp(14px, ${viewSizeCalculator(20, true)}, 20px)
-    clamp(14px, ${viewSizeCalculator(20, true)}, 20px);
+    clamp(14px, ${() => viewSizeCalculator(20, true)}, 20px)
+    clamp(14px, ${() => viewSizeCalculator(20, true)}, 20px)
+    clamp(14px, ${() => viewSizeCalculator(20, true)}, 20px);
+    
   border-top-left-radius: ${(p) =>
-    p.$isFirstActive
-      ? "0"
-      : `clamp(14px, ${viewSizeCalculator(20, true)}, 20px)`};
-  border-bottom-left-radius: clamp(14px, ${viewSizeCalculator(20, true)}, 20px);
+    p.$isFirstActive ? "0" : `clamp(14px, ${viewSizeCalculator(20, true)}, 20px)`};
+
+   border-bottom-left-radius: ${(p) =>
+    p.$isActive ? "0" : `clamp(14px, ${viewSizeCalculator(20, true)}, 20px)`};
+
   background: #fff;
   display: grid;
-  grid-template-columns: 3fr clamp(72px, ${viewSizeCalculator(104, true)}, 104px);
-  gap: clamp(8px, ${viewSizeCalculator(12, true)}, 12px);
+  grid-template-columns: 3fr clamp(72px, ${() => viewSizeCalculator(104, true)}, 104px);
+  gap: clamp(8px, ${() => viewSizeCalculator(12, true)}, 12px);
   position: relative;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -182,8 +196,8 @@ const PreviewShell = styled.div`
     position: absolute;
     left: -1px;
     bottom: ${(p) => (p.$isLastOpen ? "-1px" : "-2px")};
-    width: clamp(16px, ${viewSizeCalculator(24, true)}, 24px);
-    height: clamp(16px, ${viewHeightCalculator(24, true)}, 24px);
+    width: clamp(16px, ${() => viewSizeCalculator(24, true)}, 24px);
+    height: clamp(16px, ${() => viewHeightCalculator(24, true)}, 24px);
     pointer-events: none;
     z-index: 2;
   }
@@ -219,110 +233,37 @@ const Badge = styled.span`
 const DetailGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(6px, ${viewSizeCalculator(10, true)}, 10px)
-    clamp(8px, ${viewSizeCalculator(16, true)}, 16px);
-  margin-top: clamp(8px, ${viewHeightCalculator(12, true)}, 12px);
+  gap: clamp(6px, ${() => viewSizeCalculator(10, true)}, 10px)
+    clamp(8px, ${() => viewSizeCalculator(16, true)}, 16px);
+  margin-top: clamp(8px, ${() => viewHeightCalculator(12, true)}, 12px);
 `;
 
 const DetailItem = styled.div`
   border-left: 3px solid #e9e9ef;
-  padding-left: clamp(6px, ${viewSizeCalculator(10, true)}, 10px);
-  font-size: clamp(11px, ${viewSizeCalculator(13, true)}, 13px);
+  padding-left: clamp(6px, ${() => viewSizeCalculator(10, true)}, 10px);
+  font-size: clamp(11px, ${() => viewSizeCalculator(13, true)}, 13px);
   color: #3b3b3b;
 `;
 
 const Hint = styled.div`
   display: flex;
   align-items: center;
-  gap: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
-  margin-top: clamp(6px, ${viewHeightCalculator(10, true)}, 10px);
+  gap: clamp(6px, ${() => viewSizeCalculator(8, true)}, 8px);
+  margin-top: clamp(6px, ${() => viewHeightCalculator(10, true)}, 10px);
   color: #6a6a6a;
-  font-size: clamp(10px, ${viewSizeCalculator(12, true)}, 12px);
+  font-size: clamp(10px, ${() => viewSizeCalculator(12, true)}, 12px);
 `;
 
-const CanvasWrap = styled.div`
-  width: 100%;
-  height: clamp(250px, ${viewHeightCalculator(450, true)}, 450px);
-  border-radius: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
 
-const PageCanvas = styled.canvas`
-  width: 100%;
-  height: auto;
-  transition: opacity 220ms ease, transform 220ms ease;
-  will-change: opacity, transform;
-`;
 
-const shimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-`;
 
-const SkeletonBox = styled.div`
-  width: 100%;
-  height: 50%;
-  border-radius: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
-  background: linear-gradient(90deg, #f0f0f3 0%, #e6e6ee 50%, #f0f0f3 100%);
-  background-size: 100% 100%;
-  animation: ${shimmer} 1.2s ease-in-out infinite;
-`;
 
-const ThumbnailGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: clamp(6px, ${viewSizeCalculator(8, true)}, 8px);
-  margin-top: clamp(40px, ${viewHeightCalculator(68, true)}, 68px);
-  width: clamp(72px, ${viewSizeCalculator(104, true)}, 104px);
-  align-items: center;
-  max-height: clamp(180px, ${viewHeightCalculator(300, true)}, 300px);
-  overflow-y: auto;
 
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-track {
-    background: #faf4f9;
-    border-radius: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #f1d0e3;
-    border-radius: 8px;
-    border: 2px solid #faf4f9;
-  }
-`;
 
-const Thumb = styled.div`
-  width: clamp(72px, ${viewSizeCalculator(96, true)}, 96px);
-  height: clamp(100px, ${viewHeightCalculator(128, true)}, 128px);
-  border-radius: clamp(4px, ${viewSizeCalculator(6, true)}, 6px);
-  background: #ffffff;
-  border: 2px solid ${(p) => (p.$active ? "#ff4da6" : "#f1d0e3")};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
 
-  &:hover {
-    transform: translateY(-1px) scale(1.03);
-    border-color: #ff4da6;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  }
 
-  &:active {
-    transform: translateY(0) scale(0.99);
-  }
-
-  canvas {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-`;
 const SectionCard = styled.button`
+
   ${(p) =>
     p.$active && p.$wide && p.$isFirst
       ? `
@@ -331,7 +272,7 @@ const SectionCard = styled.button`
       position: absolute;
       top: -1px;
       right: -6px;
-      width: 24px;
+      width: clamp(12px, ${viewSizeCalculator(24, true)}, 24px);
       height: 1px;
       background: #ffd1e8;
       z-index: 3;
@@ -339,44 +280,57 @@ const SectionCard = styled.button`
     border-top: 2px solid #ffd1e8;
     margin-top: 0;
   `
-      : ''}
+      : ""}
+    ${(p) =>
+    p.$active && p.$wide && p.$isLast
+      ? `
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      right: -6px;
+      width: clamp(12px, ${viewSizeCalculator(24, true)}, 24px);
+      height: 1px;
+      background: #ffd1e8;
+      z-index: 3;
+    }
+    border-bottom: 2px solid #ffd1e8;
+    margin-bottom: 0;
+  `
+      : ""}
 
-  padding: ${(p) => (p.$wide ? '0px' : '16px')};
-  margin: ${(p) => (p.$wide ? '0px 0 2px 16px' : '8px 8px')};
+  padding: ${(p) => (p.$wide ? "0px" : "16px")};
+  margin: ${(p) => (p.$wide ? "0px 0 0px 16px" : "8px 8px")};
   position: relative;
   background: #fff;
 
   border: ${(p) =>
-    p.$active && p.$wide ? '2px solid #ffd1e8' : '2px solid #f1d0e3'};
+    p.$active && p.$wide ? "2px solid #ffd1e8" : "2px solid #f1d0e3"};
 
-  z-index: ${(p) => (p.$active && p.$wide ? '2' : '1')};
-  right: ${(p) => (p.$active && p.$wide ? '-3px' : '0')};
+  z-index: ${(p) => (p.$active && p.$wide ? "2" : "1")};
+  right: ${(p) => (p.$active && p.$wide ? "-3px" : "0")};
 
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
 
   width: ${(p) =>
-    p.$wide
-      ? p.$active
-        ? 'calc(100% - 16px)'
-        : 'calc(95% - 8px)'
-      : '95%'};
+    p.$wide ? (p.$active ? "calc(100% - 16px)" : "calc(95% - 8px)") : "95%"};
 
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Border-right only in wide mode */
   border-right: ${(p) =>
-    p.$wide && p.$active ? '4px solid #ffffff' : '2px solid #f1d0e3'};
+    p.$wide && p.$active ? "4px solid #ffffff" : "2px solid #f1d0e3"};
 
   border-radius: 20px;
 
-  /* ✅ Keep right corners curved in non-wide active mode */
+  /* Keep right corners curved in non-wide active mode */
   border-top-right-radius: ${(p) =>
-    !p.$wide && p.$active ? '20px' : p.$wide && p.$active ? '0px' : '20px'};
+    !p.$wide && p.$active ? "20px" : p.$wide && p.$active ? "0px" : "20px"};
 
   border-bottom-right-radius: ${(p) =>
-    !p.$wide && p.$active ? '20px' : p.$wide && p.$active ? '0px' : '20px'};
+    !p.$wide && p.$active ? "20px" : p.$wide && p.$active ? "0px" : "20px"};
 
   cursor: pointer;
   opacity: 1;
@@ -387,29 +341,17 @@ const SectionCard = styled.button`
   }
 `;
 
-
-
-
-
-
-
 const AccordionContent = styled.div`
   max-height: ${(p) =>
-    p.$open
-      ? `clamp(300px, ${viewHeightCalculator(500, true)}, 500px)`
-      : "0"};
+    p.$open ? `clamp(300px, ${viewHeightCalculator(500, true)}, 500px)` : "0"};
   opacity: ${(p) => (p.$open ? "1" : "0")};
   overflow: hidden;
-  transition:
-    max-height 1s cubic-bezier(0.68, -0.55, 0.27, 1.55),
-    opacity 0.5s ease,
+  transition: max-height 1s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease,
     transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
   margin-top: ${(p) => (p.$open ? "0" : "0")};
   position: ${(p) => (p.$wide ? "relative" : "static")};
   transform: ${(p) =>
-    p.$open
-      ? "translateY(0)"
-      : `translateY(-${viewHeightCalculator(10, true)}) scale(0.98)`};
+    p.$open ? "translateY(0)" : `translateY(-${viewHeightCalculator(10, true)}) scale(0.98)`};
 `;
 
 const AccordionInner = styled.div`
@@ -422,29 +364,20 @@ const AccordionInner = styled.div`
 `;
 
 const DetailsShell = styled.div`
-  margin: 0 0
-    clamp(10px, ${viewSizeCalculator(16, true)}, 16px)
-    clamp(10px, ${viewSizeCalculator(16, true)}, 16px);
+  margin: 0 0 clamp(10px, ${() => viewSizeCalculator(16, true)}, 16px)
+    clamp(10px, ${() => viewSizeCalculator(16, true)}, 16px);
   padding: 0;
-  border-radius: clamp(14px, ${viewSizeCalculator(20, true)}, 20px) 0 0
-    clamp(14px, ${viewSizeCalculator(20, true)}, 20px);
+  border-radius: clamp(14px, ${() => viewSizeCalculator(20, true)}, 20px) 0 0
+    clamp(14px, ${() => viewSizeCalculator(20, true)}, 20px);
   border-top-left-radius: ${(p) =>
-    p.$noTopLeft
-      ? "0"
-      : `clamp(14px, ${viewSizeCalculator(20, true)}, 20px)`};
+    p.$noTopLeft ? "0" : `clamp(14px, ${viewSizeCalculator(20, true)}, 20px)`};
   background: #ffffff;
   height: ${(p) =>
-    p.$wide
-      ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)`
-      : "auto"};
+    p.$wide ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)` : "auto"};
   min-height: ${(p) =>
-    p.$wide
-      ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)`
-      : "auto"};
+    p.$wide ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)` : "auto"};
   max-height: ${(p) =>
-    p.$wide
-      ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)`
-      : "none"};
+    p.$wide ? `clamp(80px, ${viewHeightCalculator(100, true)}, 100px)` : "none"};
   overflow-y: ${(p) => (p.$wide ? "auto" : "visible")};
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(0);
@@ -468,123 +401,13 @@ const SectionHeaderBar = styled.div`
   border-bottom-right-radius: 0;
 `;
 
-
 const SECTIONS = [
-  { k: "ground", label: "Ground Lease", icon: '/assets/flag.png' },
-  { k: "tower", label: "Tower Lease", icon: 'assets/tower.png' },
-  { k: "utility", label: "Utility Easement", icon: 'assets/sun.png' },
-  { k: "access", label: "Access Easement", icon: 'assets/sketch.png' },
-  { k: "insights", label: "Insights", icon: 'assets/star.png' },
+  { k: "ground", label: "Ground Lease", icon: "/assets/flag.png" },
+  { k: "tower", label: "Tower Lease", icon: "/assets/tower.png" },
+  { k: "utility", label: "Utility Easement", icon: "/assets/sun.png" },
+  { k: "access", label: "Access Easement", icon: "/assets/sketch.png" },
+  { k: "insights", label: "Insights", icon: "/assets/star.png" },
 ];
-
-const PDFThumbnailViewer = ({ pdfUrl, onPageClick, currentPage }) => {
-  const [pageNumbers, setPageNumbers] = React.useState([]);
-  const canvasRefs = React.useRef([]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const renderThumbnails = async () => {
-      try {
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        const pdf = await loadingTask.promise;
-        const nums = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
-        if (cancelled) return;
-        setPageNumbers(nums);
-
-        requestAnimationFrame(async () => {
-          for (let i = 0; i < nums.length; i += 1) {
-            if (cancelled) return;
-            const pageIndex = nums[i];
-            const page = await pdf.getPage(pageIndex);
-            const baseViewport = page.getViewport({ scale: 1 });
-            const targetWidth = 96;
-            const scale = targetWidth / baseViewport.width;
-            const viewport = page.getViewport({ scale });
-
-            const canvas = canvasRefs.current[i];
-            if (!canvas) continue;
-            const ctx = canvas.getContext("2d");
-            canvas.width = Math.max(1, Math.floor(viewport.width));
-            canvas.height = Math.max(1, Math.floor(viewport.height));
-
-            await page.render({ canvasContext: ctx, viewport }).promise;
-          }
-        });
-      } catch {
-        // swallow
-      }
-    };
-
-    if (pdfUrl) renderThumbnails();
-    return () => {
-      cancelled = true;
-    };
-  }, [pdfUrl]);
-
-  return (
-    <ThumbnailGrid>
-      {pageNumbers.map((num, index) => (
-        <Thumb
-          key={`thumb-${num}`}
-          onClick={() => onPageClick(num)}
-          title={`Page ${num}`}
-          $active={num === currentPage}
-          aria-selected={num === currentPage}
-        >
-          <canvas ref={(el) => (canvasRefs.current[index] = el)} />
-        </Thumb>
-      ))}
-    </ThumbnailGrid>
-  );
-};
-
-const PDFPageCanvas = ({ pdfUrl, pageNumber }) => {
-  const canvasRef = React.useRef(null);
-  const [loading, setLoading] = React.useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const renderPage = async () => {
-      try {
-        setLoading(true);
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(pageNumber || 1);
-        const baseViewport = page.getViewport({ scale: 1 });
-        const targetHeight = 350;
-        const scale = targetHeight / baseViewport.height;
-        const viewport = page.getViewport({ scale });
-
-        const canvas = canvasRef.current;
-        if (!canvas || cancelled) return;
-        const ctx = canvas.getContext("2d");
-        canvas.width = Math.max(1, Math.floor(viewport.width));
-        canvas.height = Math.max(1, Math.floor(viewport.height));
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        if (!cancelled) setLoading(false);
-      } catch {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    renderPage();
-    return () => {
-      cancelled = true;
-    };
-  }, [pdfUrl, pageNumber]);
-
-  return (
-    <CanvasWrap>
-      {loading ? (
-        <SkeletonBox />
-      ) : null}
-      <PageCanvas
-        ref={canvasRef}
-        style={{ opacity: loading ? 0 : 1, transform: loading ? "translateY(6px)" : "translateY(0)" }}
-      />
-    </CanvasWrap>
-  );
-};
 
 const GroundContent = ({ isWide }) => {
   return (
@@ -699,47 +522,19 @@ const AccessContent = ({ isWide }) => {
 };
 
 const InsightsContent = () => (
-  <div style={{ padding: "12px 14px" }}>
-    <div style={{ fontWeight: 700, color: "#2b2b2b", marginBottom: "10px" }}>
-      Insights
-    </div>
-    <p
-      style={{
-        margin: "10px 0",
-        color: "#4a4a4a",
-        fontSize: "13px",
-        lineHeight: "1.5",
-      }}
-    >
+  <Container>
+    <Paragraph>
       The ground lease for this site is set to expire on March 15, 2026 (next 6
       months). Landlord has indicated interest in revising terms upward by ~15%.
-    </p>
-    <p
-      style={{
-        margin: "10px 0",
-        color: "#4a4a4a",
-        fontSize: "13px",
-        lineHeight: "1.5",
-      }}
-    >
+    </Paragraph>
+    <Paragraph>
       Opportunity: Strategically located near a major corridor; relocation
       unlikely.
-    </p>
-    {/* <p
-      style={{
-        margin: "10px 0",
-        color: "#4a4a4a",
-        fontSize: "13px",
-        lineHeight: "1.5",
-      }}
-    >
-      Action: Start negotiations by December 2025.
-    </p> */}
-  </div>
+    </Paragraph>
+  </Container>
 );
-
 const SectionCardComponent = React.forwardRef((props, ref) => {
-  const { section, activeKey, isActive, isOpen, isWide, onToggle, style = {}, isFirst } = props;
+  const { section, isOpen, isWide, onToggle, isFirst, isLast } = props;
   const { k, label, icon } = section;
 
   const renderContent = () => {
@@ -762,38 +557,50 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
   return (
     <SectionCard
       onClick={() => onToggle(k)}
-      aria-expanded={isOpen}
-      $active={isOpen}
-      $wide={isWide}
-      $isFirst={isFirst}
-
+      aria-expanded={!!isOpen}
+      $active={!!isOpen}
+      $wide={!!isWide}
+      $isFirst={!!isFirst}
+      $isLast={!!isLast}
       data-section={k}
-      style={style}
+      style={{}}
       ref={ref}
     >
       <div style={{ width: "100%" }}>
         {isWide ? (
           <>
-
-            <SectionHeaderBar>
+            <SectionHeaderBar $wide>
               <SectionHeader>
                 <SectionTitle>
-                  {icon && <img src={icon} alt={label} style={{ width: 18, height: 18 }} />}
+                  {icon && (
+                    <img src={icon} alt={label} style={{ width: 18, height: 18 }} />
+                  )}
                   <span style={{ marginLeft: 6 }}>{label}</span>
                 </SectionTitle>
 
-                {k !== "insights" && (
+                {(
                   <BadgeRow>
-                    <Badge title="On track" color="#1db954">
-                      <img src="/assets/green.png" alt="On track" style={{ width: '12px', height: '12px' }} />
+                    <Badge title="On track" $size="sm">
+                      <img
+                        src="/assets/green.png"
+                        alt="On track"
+                        style={{ width: 12, height: 12 }}
+                      />
                     </Badge>
-                    <Badge title="Risk" color="#ff7a45">
-                      <img src="/assets/red.png" alt="Risk" style={{ width: '12px', height: '12px' }} />
+                    <Badge title="Risk" $size="sm">
+                      <img
+                        src="/assets/red.png"
+                        alt="Risk"
+                        style={{ width: 12, height: 12 }}
+                      />
                     </Badge>
-                    <Badge title="Notes" color="#ff4da6">
-                      <img src="/assets/save.png" alt="Notes" style={{ width: '12px', height: '12px' }} />
+                    <Badge title="Notes" $size="sm">
+                      <img
+                        src="/assets/save.png"
+                        alt="Notes"
+                        style={{ width: 12, height: 12 }}
+                      />
                     </Badge>
-
                   </BadgeRow>
                 )}
               </SectionHeader>
@@ -806,21 +613,30 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
           <>
             <SectionHeader>
               <SectionTitle>
-                {icon && <img src={icon} alt={label} style={{ width: 18, height: 18 }} />}
+                {icon && (
+                  <img src={icon} alt={label} style={{ width: 18, height: 18 }} />
+                )}
                 <span style={{ marginLeft: 6 }}>{label}</span>
               </SectionTitle>
-              {k !== "insights" && (
+              {(
                 <BadgeRow>
-                  <Badge title="On track" color="#1db954">
-                    <img src="/assets/green.png" alt="On track" style={{ width: '12px', height: '12px' }} />
+                  <Badge title="On track" $size="sm">
+                    <img
+                      src="/assets/green.png"
+                      alt="On track"
+                      style={{ width: 12, height: 12 }}
+                    />
                   </Badge>
-                  <Badge title="Risk" color="#ff7a45">
-                    <img src="/assets/red.png" alt="Risk" style={{ width: '12px', height: '12px' }} />
+                  <Badge title="Risk" $size="sm">
+                    <img src="/assets/red.png" alt="Risk" style={{ width: 12, height: 12 }} />
                   </Badge>
-                  <Badge title="Notes" color="#ff4da6">
-                    <img src="/assets/save.png" alt="Notes" style={{ width: '12px', height: '12px' }} />
+                  <Badge title="Notes" $size="sm">
+                    <img
+                      src="/assets/save.png"
+                      alt="Notes"
+                      style={{ width: 12, height: 12 }}
+                    />
                   </Badge>
-
                 </BadgeRow>
               )}
             </SectionHeader>
@@ -834,21 +650,18 @@ const SectionCardComponent = React.forwardRef((props, ref) => {
   );
 });
 
-
 export default function App({ onClose = () => { } }) {
-  const [wide, setWide] = React.useState(false);
-  const activeSectionRef = useRef(null);
-  const [selectedPage, setSelectedPage] = React.useState(1); 
-
-  const [openKeys, setOpenKeys] = React.useState({
+  const [wide, setWide] = useState(false);
+  const [selectedPage, setSelectedPage] = useState(1);
+  const [openKeys, setOpenKeys] = useState({
     ground: true,
     tower: false,
     utility: false,
     access: false,
     insights: false,
   });
-  const [activeKey, setActiveKey] = React.useState("ground");
-  const sectionRefs = React.useRef({});
+  const [activeKey, setActiveKey] = useState("ground");
+  const sectionRefs = useRef({});
 
   const toggle = (key) => {
     setActiveKey(key);
@@ -862,46 +675,8 @@ export default function App({ onClose = () => { } }) {
     });
   };
 
+
   const sortedSections = SECTIONS;
-  const [gapStyle, setGapStyle] = React.useState({ top: 0, height: 0 });
-
-  React.useEffect(() => {
-    if (!wide) return;
-
-    const updateGap = () => {
-      const sectionEl = sectionRefs.current[activeKey];
-      const previewEl = document.querySelector('[data-preview-shell]');
-      if (!sectionEl || !previewEl) return;
-
-      const sectionRect = sectionEl.getBoundingClientRect();
-      const previewRect = previewEl.getBoundingClientRect();
-      const style = window.getComputedStyle(sectionEl);
-      const paddingTop = parseFloat(style.paddingTop);
-      const paddingBottom = parseFloat(style.paddingBottom);
-      const borderTop = parseFloat(style.borderTopWidth);
-      const borderBottom = parseFloat(style.borderBottomWidth);
-
-      setGapStyle({
-        top: sectionRect.top - previewRect.top + borderTop + paddingTop,
-        height: sectionRect.height - paddingTop - paddingBottom - borderTop - borderBottom,
-      });
-
-    };
-
-    updateGap();
-
-    const resizeObserver = new ResizeObserver(updateGap);
-    if (sectionRefs.current[activeKey]) resizeObserver.observe(sectionRefs.current[activeKey]);
-
-    const panelWrap = document.querySelector('[data-panel-wrap]');
-    if (panelWrap) panelWrap.addEventListener('scroll', updateGap);
-
-    return () => {
-      resizeObserver.disconnect();
-      if (panelWrap) panelWrap.removeEventListener('scroll', updateGap);
-    };
-  }, [activeKey, wide]);
-
 
   return (
     <PanelWrap $wide={wide} onClick={(e) => e.stopPropagation()} data-panel-wrap>
@@ -920,33 +695,27 @@ export default function App({ onClose = () => { } }) {
                 >
                   <img
                     src="/assets/wide.png"
-                    alt="Favorite"
-                    style={{ width: '25px', height: '25px' }}
+                    alt="Toggle wide"
+                    style={{ width: "25px", height: "25px" }}
                   />
                 </IconBtn>
                 <IconBtn aria-label="favorite">
                   <img
-                    src="/assets/starshape.png" alt="Expand"
-                    style={{ width: '20px', height: '20px' }}
-
+                    src="/assets/starshape.png"
+                    alt="Favorite"
+                    style={{ width: "20px", height: "20px" }}
                   />
                 </IconBtn>
               </>
             )}
           </HeaderRow>
           <SubTitle>Seattle \\ West \\ Northwest</SubTitle>
-          <SubTitleSecondary>
-            Tower Type: Macro Tower (150 ft)
-          </SubTitleSecondary>
-          
+          <SubTitleSecondary $wide={wide}>Tower Type: Macro Tower (150 ft)</SubTitleSecondary>
         </div>
         <HeaderRight>
           {wide ? (
             <IconBtn aria-label="close" onClick={onClose} title="Close">
-              <img
-                src="/assets/cross.png" alt="Cross"
-                style={{ width: '25px', height: '25px' }}
-              />
+              <img src="/assets/cross.png" alt="Close" style={{ width: "25px", height: "25px" }} />
             </IconBtn>
           ) : (
             <>
@@ -955,78 +724,61 @@ export default function App({ onClose = () => { } }) {
                 onClick={() => setWide((w) => !w)}
                 title="Toggle wide view"
               >
-                <img
-                  src="/assets/wide.png"
-                  alt="Favorite"
-                  style={{ width: '25px', height: '25px' }}
-                />
-              </IconBtn>  <IconBtn aria-label="favorite">
-                <img
-                  src="/assets/starshape.png" alt="Expand"
-                  style={{ width: '20px', height: '20px' }}
-                />
+                <img src="/assets/wide.png" alt="Toggle wide" style={{ width: "25px", height: "25px" }} />
               </IconBtn>
-
+              <IconBtn aria-label="favorite">
+                <img src="/assets/starshape.png" alt="Favorite" style={{ width: "20px", height: "20px" }} />
+              </IconBtn>
             </>
           )}
         </HeaderRight>
       </Header>
+
       <div>
         {wide ? (
           <AccordionInner $wide>
-            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: "clamp(6px, 1vw, 10px)" }}>
               {sortedSections.map((section, idx) => (
                 <SectionCardComponent
                   key={section.k}
                   ref={(el) => (sectionRefs.current[section.k] = el)}
                   section={section}
-                  activeKey={activeKey}
-                  isActive={activeKey === section.k}
                   isOpen={openKeys[section.k]}
                   isWide={wide}
                   onToggle={toggle}
                   isFirst={idx === 0}
-
+                  isLast={idx === SECTIONS.length - 1}
                   style={{
-                    borderTopLeftRadius: idx === 0 ? "12px" : "12px",
+                    borderTopLeftRadius: "12px",
                     borderBottomLeftRadius: idx === sortedSections.length - 1 ? "12px" : "12px",
-
                     borderTopRightRadius: activeKey === section.k ? "0px" : "12px",
                     borderBottomRightRadius: activeKey === section.k ? "0px" : "12px",
                   }}
                 />
               ))}
-
-
             </div>
+
             <PreviewShell
-              data-preview-shell
+              $isActive={activeKey === SECTIONS[SECTIONS.length - 1].k}
               $wide
-              $gapTop={`${gapStyle.top}px`}
-              $gapHeight={`${gapStyle.height}px`}
               $isLastOpen={activeKey === SECTIONS[SECTIONS.length - 1].k}
               $isFirstActive={activeKey === SECTIONS[0].k}
             >
               <div className="curve" />
-              <PDFPageCanvas pdfUrl="/dummy.pdf" pageNumber={selectedPage} />
-
-              {/* ✅ wire up thumbnail clicks */}
+              <PDFPageCanvas pdfUrl={dummyPdf} pageNumber={selectedPage} />
               <PDFThumbnailViewer
-                pdfUrl="/dummy.pdf"
+                pdfUrl={dummyPdf}
                 onPageClick={setSelectedPage}
                 currentPage={selectedPage}
               />
+
             </PreviewShell>
-
-
           </AccordionInner>
         ) : (
           sortedSections.map((section) => (
             <SectionCardComponent
-              activeKey={activeKey}
               key={section.k}
               section={section}
-              isActive={activeKey === section.k}
               isOpen={openKeys[section.k]}
               isWide={wide}
               onToggle={toggle}
