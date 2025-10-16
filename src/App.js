@@ -1,5 +1,6 @@
 import './App.css';
-import RightComponent, { SelectedSites } from './components/RigthPanel/index.jsx';
+import { SelectedSites } from './components/RightPanelBox/index.jsx';
+import RightComponent from './components/RigthPanel/index.jsx';
 
 
 function App() {
