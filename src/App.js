@@ -1,5 +1,5 @@
 import './App.css';
-import RightComponent from './components/RigthPanel/index.jsx';
+import RightComponent, { SelectedSites } from './components/RigthPanel/index.jsx';
 
 
 function App() {
@@ -9,7 +9,8 @@ function App() {
         position:"relative"
       }}
     >
-      <RightComponent/>
+      {/* <RightComponent/> */}
+      <SelectedSites/>
     </div>
   );
 }
