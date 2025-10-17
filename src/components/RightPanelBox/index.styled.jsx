@@ -43,7 +43,7 @@ export const RightPanelWrapper = styled.div`
   width: ${viewSizeCalculator(408, true)};
   height: ${viewHeightCalculator(650, true)};
   background: white;
-  border-radius: ${viewSizeCalculator(20, true)};
+  border-radius: ${viewSizeCalculator(24, true)};
   box-shadow: 0px ${viewSizeCalculator(1, true)} ${viewSizeCalculator(6, true)} 0px #00000040;
   overflow-y: auto;
   z-index: 10;
@@ -120,7 +120,7 @@ export const SiteList = styled.div`
 
 export const SiteItem = styled.div`
   position: relative;
-  border-radius: ${viewSizeCalculator(12, true)};
+  border-radius: ${viewSizeCalculator(16, true)};
   border-bottom: ${viewSizeCalculator(1, true)} solid #e5e5e5;
   transition: background-color 0.4s ease, border-bottom-color 0.4s ease;
 
@@ -142,7 +142,7 @@ export const SiteRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${viewSizeCalculator(16, true)} ${viewSizeCalculator(16, true)} ${viewSizeCalculator(16, true)} ${viewSizeCalculator(8, true)};
+  padding: ${viewSizeCalculator(16, true)} ${viewSizeCalculator(24, true)} ${viewSizeCalculator(16, true)} ${viewSizeCalculator(24, true)};
   cursor: pointer;
 `;
 
@@ -152,7 +152,7 @@ export const SiteInfo = styled.div`
 
 export const SiteName = styled.div`
   font-family: 'Poppins', sans-serif;
-  font-size: ${viewSizeCalculator(15, true)};
+  font-size: ${viewSizeCalculator(14, true)};
   font-weight: 500;
   color: #1a1a1a;
   margin-bottom: ${viewSizeCalculator(4, true)};
@@ -218,14 +218,14 @@ export const TrashButton = styled.button`
     width: ${viewSizeCalculator(20, true)};
     height: ${viewSizeCalculator(20, true)};
     stroke: #a5a5a5;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition: stroke 0.2s ease, transform 0.2s ease, filter 0.2s ease;
   }
 
   &:hover svg {
-    transform: scale(1.15);
-    filter: brightness(0) saturate(100%) invert(23%) sepia(87%) saturate(5477%) hue-rotate(356deg) brightness(95%) contrast(108%);
+    stroke: black;
   }
 `;
+
 
 export const ChevronIcon = styled(ChevronRight)`
   color: #d4d4d4;
